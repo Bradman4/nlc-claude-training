@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting Started with Claude | NLC</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; color: #1a1a2e; }
+
+  .header {
+    background: linear-gradient(135deg, #1B2A4A 0%, #243657 60%, #1B2A4A 100%);
+    color: white; padding: 40px 24px 36px; text-align: center; position: relative; overflow: hidden;
+  }
+  .header::before { content: ''; position: absolute; top: -40px; right: -40px; width: 220px; height: 220px; border-radius: 50%; background: rgba(244,162,30,0.12); pointer-events: none; }
+  .header::after { content: ''; position: absolute; bottom: -60px; left: -30px; width: 180px; height: 180px; border-radius: 50%; background: rgba(244,162,30,0.08); pointer-events: none; }
+  .nlc-badge { display: inline-flex; align-items: center; gap: 10px; background: rgba(244,162,30,0.15); border: 1px solid rgba(244,162,30,0.4); border-radius: 30px; padding: 6px 18px; margin-bottom: 16px; font-size: 0.85rem; font-weight: 600; color: #F4A21E; }
+  .nlc-logo-text { font-size: 1.3rem; font-weight: 800; letter-spacing: 2px; color: #F4A21E; }
+  .header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; }
+  .header p { font-size: 1rem; opacity: 0.85; max-width: 580px; margin: 0 auto; line-height: 1.6; }
+
+  .progress-bar-wrap { background: #e2e8f0; height: 5px; }
+  .progress-bar { height: 5px; background: linear-gradient(90deg, #F4A21E, #e8920a); transition: width 0.4s ease; }
+
+  .nav { display: flex; gap: 6px; overflow-x: auto; padding: 14px 20px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+  .nav-btn { padding: 7px 14px; border: 2px solid #e2e8f0; border-radius: 20px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 600; white-space: nowrap; color: #555; transition: all 0.2s; }
+  .nav-btn.active { background: #1B2A4A; border-color: #1B2A4A; color: white; }
+  .nav-btn.done { border-color: #F4A21E; color: #c47f00; background: #fffbf0; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+
+  .module { display: none; animation: fadeIn 0.3s ease; }
+  .module.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .module-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F4A21E; }
+  .module-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+  .module-header h2 { font-size: 1.6rem; font-weight: 700; color: #1B2A4A; }
+  .module-header p { color: #666; margin-top: 4px; font-size: 0.9rem; }
+
+  .card { background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
+  .card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; color: #1B2A4A; padding-bottom: 10px; border-bottom: 2px solid #f5f5f5; }
+
+  .prompt-example { background: #fffbf0; border-left: 4px solid #F4A21E; border-radius: 0 12px 12px 0; padding: 14px 50px 14px 16px; margin: 10px 0; font-style: italic; color: #4a3800; cursor: pointer; transition: all 0.2s; position: relative; font-size: 0.93rem; line-height: 1.5; }
+  .prompt-example:hover { background: #fff3d6; transform: translateX(4px); }
+  .prompt-example::after { content: "📋 Copy"; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; color: #F4A21E; font-style: normal; font-weight: 600; }
+  .prompt-example.copied::after { content: "✅ Copied!"; color: #48bb78; }
+
+  .tip { display: flex; gap: 12px; padding: 13px 14px; background: #f8faff; border-radius: 12px; border: 1px solid #dde8f8; margin: 10px 0; }
+  .tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+  .tip-text { font-size: 0.93rem; color: #2d3748; line-height: 1.6; }
+  .warning { background: #fff8f0; border-color: #fcd99a; }
+
+  .do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:600px) { .do-dont { grid-template-columns: 1fr; } }
+  .do { background: #f0fff4; border: 1px solid #9ae6b4; border-radius: 12px; padding: 16px; }
+  .dont { background: #fff5f5; border: 1px solid #fed7d7; border-radius: 12px; padding: 16px; }
+  .do h4 { color: #276749; margin-bottom: 10px; font-size: 0.95rem; }
+  .dont h4 { color: #9b2c2c; margin-bottom: 10px; font-size: 0.95rem; }
+  .do li, .dont li { margin-left: 16px; margin-bottom: 6px; font-size: 0.88rem; line-height: 1.5; }
+
+  .use-cases { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  .use-case { background: white; border: 2px solid #e2e8f0; border-radius: 14px; padding: 18px; text-align: center; transition: all 0.2s; }
+  .use-case:hover { border-color: #F4A21E; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(244,162,30,0.18); }
+  .use-case .uc-icon { font-size: 1.9rem; margin-bottom: 8px; }
+  .use-case h4 { font-size: 0.88rem; font-weight: 700; color: #1B2A4A; margin-bottom: 4px; }
+  .use-case p { font-size: 0.78rem; color: #666; line-height: 1.4; }
+
+  .prompt-anatomy { background: #1B2A4A; border-radius: 16px; padding: 24px; color: #e2e8f0; font-family: monospace; font-size: 0.93rem; line-height: 1.9; }
+  .hl-role { color: #F4A21E; font-weight: bold; }
+  .hl-ctx { color: #68d391; font-weight: bold; }
+  .hl-task { color: #76e4f7; font-weight: bold; }
+  .hl-fmt { color: #d6bcfa; font-weight: bold; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: #444; }
+  .legend-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+
+  .quiz-question { font-size: 1.05rem; font-weight: 600; margin-bottom: 16px; color: #1B2A4A; }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-opt { padding: 13px 18px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; background: white; font-size: 0.93rem; transition: all 0.2s; text-align: left; }
+  .quiz-opt:hover:not(:disabled) { border-color: #F4A21E; background: #fffbf0; }
+  .quiz-opt.correct { border-color: #48bb78; background: #f0fff4; color: #276749; font-weight: 600; }
+  .quiz-opt.wrong { border-color: #fc8181; background: #fff5f5; color: #9b2c2c; }
+  .quiz-result { margin-top: 14px; padding: 13px; border-radius: 12px; font-weight: 600; display: none; font-size: 0.93rem; }
+  .quiz-result.show { display: block; }
+  .quiz-result.pass { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+  .quiz-result.fail { background: #fff5f5; color: #9b2c2c; border: 1px solid #fed7d7; }
+
+  .btn-row { display: flex; justify-content: space-between; margin-top: 32px; }
+  .btn { padding: 11px 26px; border-radius: 12px; border: none; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: all 0.2s; }
+  .btn-primary { background: linear-gradient(135deg, #1B2A4A, #2e4a7a); color: white; }
+  .btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, #F4A21E, #e8920a); transform: translateY(-1px); }
+  .btn-secondary { background: #e2e8f0; color: #2d3748; }
+  .btn-secondary:hover { background: #cbd5e0; }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+
+  .completion { text-align: center; padding: 32px 16px; }
+  .completion .badge { font-size: 4.5rem; margin-bottom: 14px; }
+  .completion h2 { font-size: 1.8rem; margin-bottom: 10px; color: #1B2A4A; }
+  .completion p { color: #666; font-size: 1rem; margin-bottom: 20px; line-height: 1.6; }
+  .cheatsheet { background: linear-gradient(135deg, #fffbf0, #f0f5ff); border: 1px solid #fcd99a; border-radius: 16px; padding: 24px; text-align: left; margin-top: 20px; }
+  .cheatsheet h3 { margin-bottom: 16px; color: #1B2A4A; font-size: 1.05rem; }
+  .cs-item { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+  .cs-key { background: #1B2A4A; color: white; border-radius: 8px; padding: 3px 12px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .cs-val { font-size: 0.9rem; color: #444; line-height: 1.5; }
+  .row-feature { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 14px; }
+  .row-label { background: #1B2A4A; color: white; border-radius: 8px; padding: 4px 12px; font-weight: 700; min-width: 130px; text-align: center; font-size: 0.82rem; flex-shrink: 0; margin-top: 2px; }
+  .row-desc { color: #444; font-size: 0.93rem; line-height: 1.6; }
+  .step-num { background: #1B2A4A; color: #F4A21E; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; }
+  .step-sm { background: #1B2A4A; color: #F4A21E; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.82rem; flex-shrink: 0; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="nlc-badge"><span class="nlc-logo-text">NLC</span><span>Northwest Lineman College</span></div>
+  <h1>Getting Started with Claude AI</h1>
+  <p>Your official NLC guide to using Claude — from your first prompt to everyday productivity on the job.</p>
+</div>
+
+<div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:16.6%"></div></div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="goTo(0)">1. What is Claude?</button>
+  <button class="nav-btn" onclick="goTo(1)">2. Interface Tour</button>
+  <button class="nav-btn" onclick="goTo(2)">3. Writing Prompts</button>
+  <button class="nav-btn" onclick="goTo(3)">4. NLC Use Cases</button>
+  <button class="nav-btn" onclick="goTo(4)">5. Tips & Security</button>
+  <button class="nav-btn" onclick="goTo(5)">6. Quiz & Wrap-Up</button>
+</nav>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- MODULE 1: WHAT IS CLAUDE? -->
+<!-- ============================================================ -->
+<div class="module active" id="mod-0">
+  <div class="module-header">
+    <div class="module-icon" style="background:#fffbeb;">🧠</div>
+    <div><h2>What is Claude?</h2><p>Meet your new AI assistant</p></div>
+  </div>
+
+  <div class="card">
+    <h3>Meet Claude</h3>
+    <p style="line-height:1.75;color:#444;">Claude is an AI assistant made by <strong>Anthropic</strong>. Think of Claude as a highly knowledgeable colleague who can read, write, analyze, answer questions, help draft documents, and talk through almost any topic — available whenever you need it.</p>
+  </div>
+
+  <div class="card">
+    <h3>🎬 Official Getting Started Video</h3>
+    <p style="color:#666;font-size:0.9rem;margin-bottom:14px;">Watch this 5-minute official Anthropic tutorial to see Claude in action.</p>
+    <a href="https://www.youtube.com/watch?v=0vZ_UVLhSQQ" target="_blank" style="display:block;text-decoration:none;">
+      <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;cursor:pointer;">
+        <img src="https://img.youtube.com/vi/0vZ_UVLhSQQ/maxresdefault.jpg" alt="Getting Started with Claude.ai" style="width:100%;display:block;opacity:0.85;">
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(244,162,30,0.92);border-radius:50%;width:72px;height:72px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:0;height:0;border-top:18px solid transparent;border-bottom:18px solid transparent;border-left:30px solid white;margin-left:6px;"></div>
+        </div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.75));padding:16px;color:white;">
+          <div style="font-weight:700;font-size:0.95rem;">Getting Started with Claude.ai</div>
+          <div style="font-size:0.8rem;opacity:0.85;">Anthropic Official Tutorial · 5 min · Opens on YouTube</div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="card">
+    <h3>🖥️ Interactive Dashboard Demo</h3>
+    <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">Click through a sample Claude conversation to see how it works before you try it yourself.</p>
+    <div style="border:1px solid #dde3ed;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+      <div style="background:#1B2A4A;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;gap:10px;"><div style="width:10px;height:10px;border-radius:50%;background:#ff5f57;"></div><div style="width:10px;height:10px;border-radius:50%;background:#febc2e;"></div><div style="width:10px;height:10px;border-radius:50%;background:#28c840;"></div></div>
+        <div style="color:#F4A21E;font-weight:700;font-size:0.85rem;letter-spacing:1px;">claude.ai</div>
+        <div style="width:60px;"></div>
+      </div>
+      <div style="display:flex;min-height:360px;">
+        <div style="background:#f8f9fb;width:170px;flex-shrink:0;border-right:1px solid #e8ecf2;padding:14px 10px;">
+          <div style="background:#1B2A4A;color:white;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-weight:700;text-align:center;margin-bottom:14px;">+ New Chat</div>
+          <div style="font-size:0.7rem;color:#999;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Recent</div>
+          <div style="padding:7px 8px;border-radius:8px;font-size:0.78rem;color:#444;background:#e8f0fe;font-weight:600;border-left:3px solid #F4A21E;">⚡ Safety Briefing Help</div>
+          <div style="padding:7px 8px;border-radius:8px;font-size:0.78rem;color:#888;margin-top:4px;">📄 Quiz on Transformers</div>
+          <div style="padding:7px 8px;border-radius:8px;font-size:0.78rem;color:#888;margin-top:4px;">✉️ Student Follow-Up</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;background:white;">
+          <div id="chat-messages" style="flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;min-height:280px;">
+            <div id="demo-intro" style="text-align:center;margin:auto;">
+              <div style="font-size:2.5rem;margin-bottom:10px;">👋</div>
+              <div style="font-weight:700;color:#1B2A4A;font-size:1rem;margin-bottom:6px;">Welcome to the Claude Dashboard Demo</div>
+              <div style="color:#666;font-size:0.85rem;max-width:300px;margin:0 auto 16px;">Click the prompts below to walk through a real NLC conversation step by step.</div>
+              <div style="background:#fffbf0;border:1px solid #F4A21E;border-radius:10px;padding:10px 14px;font-size:0.8rem;color:#7a5000;display:inline-block;">Click <strong>Step 1</strong> below to get started ↓</div>
+            </div>
+          </div>
+          <div style="border-top:1px solid #eee;padding:12px 16px;background:#fafafa;">
+            <div style="background:white;border:1.5px solid #dde3ed;border-radius:10px;padding:10px 14px;font-size:0.82rem;color:#aaa;display:flex;align-items:center;justify-content:space-between;">
+              <span id="input-preview">Try clicking a step below...</span>
+              <div style="background:#1B2A4A;border-radius:6px;padding:4px 10px;color:#F4A21E;font-size:0.75rem;font-weight:700;">Send</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <div style="font-size:0.78rem;font-weight:700;color:#1B2A4A;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Click each step to walk through the conversation:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button onclick="demoStep(1)" id="btn-step-1" style="padding:8px 16px;border-radius:20px;border:2px solid #1B2A4A;background:white;color:#1B2A4A;font-size:0.82rem;font-weight:700;cursor:pointer;">Step 1: Ask Claude</button>
+        <button onclick="demoStep(2)" id="btn-step-2" style="padding:8px 16px;border-radius:20px;border:2px solid #ddd;background:white;color:#aaa;font-size:0.82rem;font-weight:700;cursor:not-allowed;" disabled>Step 2: Claude Responds</button>
+        <button onclick="demoStep(3)" id="btn-step-3" style="padding:8px 16px;border-radius:20px;border:2px solid #ddd;background:white;color:#aaa;font-size:0.82rem;font-weight:700;cursor:not-allowed;" disabled>Step 3: Follow Up</button>
+        <button onclick="demoStep(4)" id="btn-step-4" style="padding:8px 16px;border-radius:20px;border:2px solid #ddd;background:white;color:#aaa;font-size:0.82rem;font-weight:700;cursor:not-allowed;" disabled>Step 4: Claude Refines</button>
+        <button onclick="demoStep(0)" style="padding:8px 16px;border-radius:20px;border:2px solid #fc8181;background:white;color:#e53e3e;font-size:0.82rem;font-weight:700;cursor:pointer;">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>What Claude Is Good At</h3>
+    <div class="use-cases">
+      <div class="use-case"><div class="uc-icon">✍️</div><h4>Writing</h4><p>Drafting emails, reports, policies, and training content</p></div>
+      <div class="use-case"><div class="uc-icon">💡</div><h4>Brainstorming</h4><p>Generating ideas and working through challenges</p></div>
+      <div class="use-case"><div class="uc-icon">🔍</div><h4>Research Help</h4><p>Explaining complex topics in plain language</p></div>
+      <div class="use-case"><div class="uc-icon">📊</div><h4>Analysis</h4><p>Breaking down documents, data, and arguments</p></div>
+      <div class="use-case"><div class="uc-icon">📁</div><h4>Projects</h4><p>Organizing ongoing work and keeping context across conversations</p></div>
+      <div class="use-case"><div class="uc-icon">🗣️</div><h4>Conversation</h4><p>Talking through ideas, scenarios, and decisions</p></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Important Things to Know Upfront</h3>
+    <div class="tip warning"><span class="tip-icon">⚠️</span><span class="tip-text"><strong>Not a search engine:</strong> Claude's knowledge has a cutoff date. For the very latest NEC code updates or OSHA rule changes, always verify with official sources: <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.269" target="_blank" style="color:#c47f00;font-weight:700;">OSHA 1910.269 ↗</a> · <a href="https://www.nfpa.org/codes-and-standards/nfpa-70-standard-for-electrical-installations/70" target="_blank" style="color:#c47f00;font-weight:700;">NEC (NFPA 70) ↗</a> · <a href="https://standards.ieee.org/ieee/NESC/11296/" target="_blank" style="color:#c47f00;font-weight:700;">NESC (IEEE) ↗</a></span></div>
+    <div class="tip warning"><span class="tip-icon">⚠️</span><span class="tip-text"><strong>Can make mistakes:</strong> Always double-check safety-critical, regulatory, or technical specifications before acting on them. When in doubt, verify directly with <a href="https://www.osha.gov" target="_blank" style="color:#c47f00;font-weight:700;">OSHA.gov ↗</a> or your compliance team.</span></div>
+    <div class="tip"><span class="tip-icon">✅</span><span class="tip-text"><strong>No memory by default:</strong> Each new conversation starts fresh. Claude does not remember previous chats unless you opt in to the memory feature in Settings. Once enabled, Claude can recall past conversations — but here's what to know:<br><br>
+      <strong>🔧 How to Turn Memory On:</strong><br>
+      <div style="background:#f0f5ff;border-radius:10px;padding:12px 14px;margin:10px 0;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;"><div style="background:#1B2A4A;color:#F4A21E;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;flex-shrink:0;margin-top:1px;">1</div><span>Click your <strong>profile icon</strong> in the bottom-left corner of Claude.ai</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;"><div style="background:#1B2A4A;color:#F4A21E;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;flex-shrink:0;margin-top:1px;">2</div><span>Select <strong>Settings</strong> from the menu</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;"><div style="background:#1B2A4A;color:#F4A21E;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;flex-shrink:0;margin-top:1px;">3</div><span>Click <strong>Capabilities</strong> in the left menu</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;"><div style="background:#1B2A4A;color:#F4A21E;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;flex-shrink:0;margin-top:1px;">4</div><span>Toggle on <strong>"Search and reference past chats"</strong> and <strong>"Generate memory from chat history"</strong></span></div>
+      </div>
+      <strong>• Memory is project-scoped</strong> — each Project keeps its own separate memory.<br><br>
+      <strong>• Does it max out?</strong> Claude operates within a 200,000 token context window. As memory grows, older content may be trimmed automatically.<br><br>
+      <strong>• You stay in control</strong> — view, edit, or delete memory anytime via <strong>Settings → Capabilities</strong>. Choose <em>Pause</em> (stops adding new) or <em>Reset</em> (permanently deletes all).<br><br>
+      <strong>• Best practice:</strong> Keep project instructions concise and use Projects — they only load relevant content into memory.<br><br>
+      <strong>• For everyday NLC tasks</strong> — writing briefings, quizzes, and emails — you are very unlikely to ever hit a memory limit.
+    </span></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" disabled>← Back</button>
+    <button class="btn btn-primary" onclick="goTo(1)">Next: Interface Tour →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODULE 2: INTERFACE TOUR -->
+<!-- ============================================================ -->
+<div class="module" id="mod-1">
+  <div class="module-header">
+    <div class="module-icon" style="background:#eef6ff;">🖥️</div>
+    <div><h2>Interface Tour</h2><p>Finding your way around Claude.ai</p></div>
+  </div>
+
+  <div class="card">
+    <h3>✅ How to Verify You're in the Quanta Services Instance</h3>
+    <p style="color:#444;line-height:1.75;margin-bottom:16px;">It's important to always confirm you're working inside the Quanta Services organization account — not a personal account.</p>
+    <div style="background:#1B2A4A;border-radius:14px;padding:20px 24px;margin-bottom:16px;">
+      <div style="font-weight:700;color:#F4A21E;margin-bottom:14px;font-size:0.9rem;">👀 3 Quick Checks</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;">
+          <div style="font-size:1.4rem;flex-shrink:0;">1️⃣</div>
+          <div><div style="color:#F4A21E;font-weight:700;font-size:0.88rem;margin-bottom:4px;">Check the Bottom-Left Corner</div><div style="color:rgba(255,255,255,0.85);font-size:0.85rem;line-height:1.6;">Click your <strong style="color:white;">profile icon or initials</strong>. You should see <strong style="color:#F4A21E;">"Quanta Services"</strong> listed. A <strong style="color:#68d391;">blue checkmark ✓</strong> shows your active account.</div></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;">
+          <div style="font-size:1.4rem;flex-shrink:0;">2️⃣</div>
+          <div><div style="color:#F4A21E;font-weight:700;font-size:0.88rem;margin-bottom:4px;">Look for the Organization Label in the Sidebar</div><div style="color:rgba(255,255,255,0.85);font-size:0.85rem;line-height:1.6;">When you're in the Quanta Services instance, <strong style="color:white;">"Quanta Services"</strong> appears at the top of your sidebar.</div></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;">
+          <div style="font-size:1.4rem;flex-shrink:0;">3️⃣</div>
+          <div><div style="color:#F4A21E;font-weight:700;font-size:0.88rem;margin-bottom:4px;">Check Settings → Account Plan</div><div style="color:rgba(255,255,255,0.85);font-size:0.85rem;line-height:1.6;">Your plan should show <strong style="color:white;">Team</strong> or <strong style="color:white;">Enterprise</strong> — not Free or Pro.</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+      <div style="background:#fff5f5;border:1px solid #fed7d7;border-radius:12px;padding:16px;">
+        <div style="font-weight:700;color:#9b2c2c;margin-bottom:10px;font-size:0.88rem;">❌ Personal Account</div>
+        <div style="font-size:0.83rem;color:#555;line-height:1.8;"><div>• Shows Free, Pro, or Max plan</div><div>• No organization name shown</div><div>• No enterprise security policies</div><div>• Cannot share with Quanta colleagues</div></div>
+      </div>
+      <div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:12px;padding:16px;">
+        <div style="font-weight:700;color:#276749;margin-bottom:10px;font-size:0.88rem;">✅ Quanta Services Account</div>
+        <div style="font-size:0.83rem;color:#555;line-height:1.8;"><div>• Shows Team or Enterprise plan</div><div>• "Quanta Services" name displayed</div><div>• Enterprise security policies apply</div><div>• Can share projects with colleagues</div></div>
+      </div>
+    </div>
+    <div style="font-weight:700;color:#1B2A4A;margin-bottom:10px;">🔄 How to Switch to the Quanta Services Account</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div class="step-sm">1</div><div style="font-size:0.9rem;color:#444;line-height:1.6;padding-top:4px;">Click your <strong>profile icon or initials</strong> in the bottom-left corner.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div class="step-sm">2</div><div style="font-size:0.9rem;color:#444;line-height:1.6;padding-top:4px;">Look for <strong>Quanta Services</strong> in the list of accounts.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div class="step-sm">3</div><div style="font-size:0.9rem;color:#444;line-height:1.6;padding-top:4px;">Click it to switch. A <strong>blue checkmark ✓</strong> will confirm it's active.</div></div>
+    </div>
+    <div class="tip warning" style="margin-top:14px;"><span class="tip-icon">⚠️</span><span class="tip-text"><strong>Always use your Quanta Services account for work-related tasks.</strong> If unsure, check the bottom-left corner before starting any conversation.</span></div>
+  </div>
+
+  <div class="card">
+    <h3>Key Areas of the Interface</h3>
+    <div class="row-feature"><div class="row-label">💬 Chat Area</div><p class="row-desc">The main space where your conversation appears. Your messages are on the right; Claude's responses on the left.</p></div>
+    <div class="row-feature"><div class="row-label">📝 Input Box</div><p class="row-desc">Where you type your messages. Press <strong>Enter</strong> to send, or <strong>Shift+Enter</strong> to add a new line without sending.</p></div>
+    <div class="row-feature"><div class="row-label">📁 Sidebar</div><p class="row-desc">Access past conversations, start new chats, and use Projects — organized workspaces for ongoing tasks.</p></div>
+    <div class="row-feature"><div class="row-label">📎 Attachments</div><p class="row-desc">Click the paperclip to upload files, PDFs, images, or documents for Claude to read and work with.</p></div>
+  </div>
+
+  <div class="card">
+    <h3>Useful Actions & Shortcuts</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="tip"><span class="tip-icon">⌨️</span><span class="tip-text"><strong>Enter</strong> — Send message</span></div>
+      <div class="tip"><span class="tip-icon">⌨️</span><span class="tip-text"><strong>Shift+Enter</strong> — New line</span></div>
+      <div class="tip"><span class="tip-icon">🔄</span><span class="tip-text"><strong>Regenerate</strong> — Get a new response</span></div>
+      <div class="tip"><span class="tip-icon">✏️</span><span class="tip-text"><strong>Edit</strong> — Revise a sent message</span></div>
+      <div class="tip"><span class="tip-icon">📋</span><span class="tip-text"><strong>Copy</strong> — Copy Claude's response</span></div>
+      <div class="tip"><span class="tip-icon">👍👎</span><span class="tip-text"><strong>Thumbs</strong> — Give feedback</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📁 What Are Projects?</h3>
+    <p style="color:#444;line-height:1.75;margin-bottom:16px;">Projects are dedicated workspaces that let you organize conversations around a specific topic. Claude remembers context across multiple conversations so you never have to re-explain your situation.</p>
+    <div class="tip"><span class="tip-icon">💡</span><span class="tip-text"><strong>Think of a Project like a folder</strong> — everything related to a curriculum unit, safety program, or recurring report lives in one place.</span></div>
+    <div class="tip"><span class="tip-icon">📌</span><span class="tip-text"><strong>Projects retain context:</strong> Claude remembers your instructions, preferences, and past conversations within the Project.</span></div>
+    <div class="tip"><span class="tip-icon">🗂️</span><span class="tip-text"><strong>Great for ongoing work:</strong> Curriculum development, safety documentation, student communications, and recurring tasks.</span></div>
+    <div style="font-weight:700;color:#1B2A4A;margin:16px 0 12px;font-size:0.95rem;">🛠️ How to Create a Project</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;gap:14px;align-items:flex-start;"><div class="step-num">1</div><div style="padding-top:4px;"><strong style="color:#1B2A4A;">Open the Sidebar</strong><br><span style="color:#555;font-size:0.9rem;">Click the sidebar on the left and look for <strong>+ New Project</strong>.</span></div></div>
+      <div style="display:flex;gap:14px;align-items:flex-start;"><div class="step-num">2</div><div style="padding-top:4px;"><strong style="color:#1B2A4A;">Name Your Project</strong><br><span style="color:#555;font-size:0.9rem;">Give it a clear name — e.g., <em>"Underground Distribution Curriculum"</em>.</span></div></div>
+      <div style="display:flex;gap:14px;align-items:flex-start;"><div class="step-num">3</div><div style="padding-top:4px;"><strong style="color:#1B2A4A;">Add Custom Instructions (Optional)</strong><br><span style="color:#555;font-size:0.9rem;">Tell Claude your role and audience — e.g., <em>"I am a lineman instructor at NLC. Always write for an apprentice audience."</em></span></div></div>
+      <div style="display:flex;gap:14px;align-items:flex-start;"><div class="step-num">4</div><div style="padding-top:4px;"><strong style="color:#1B2A4A;">Upload Documents (Optional)</strong><br><span style="color:#555;font-size:0.9rem;">Add existing curricula, procedures, or style guides so Claude can reference them.</span></div></div>
+      <div style="display:flex;gap:14px;align-items:flex-start;"><div class="step-num">5</div><div style="padding-top:4px;"><strong style="color:#1B2A4A;">Start Chatting</strong><br><span style="color:#555;font-size:0.9rem;">Claude will have your context every time you return — no need to re-explain.</span></div></div>
+    </div>
+    <div style="background:#fffbf0;border:1px solid #F4A21E;border-radius:12px;padding:16px;margin-top:16px;">
+      <div style="font-weight:700;color:#1B2A4A;margin-bottom:10px;">⚡ NLC Project Ideas</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:white;border:1px solid #fcd99a;border-radius:10px;padding:12px;font-size:0.85rem;"><strong>📘 Curriculum Unit</strong><br><span style="color:#555;">Build full modules with quizzes, objectives, and handouts</span></div>
+        <div style="background:white;border:1px solid #fcd99a;border-radius:10px;padding:12px;font-size:0.85rem;"><strong>🦺 Safety Program</strong><br><span style="color:#555;">Draft and store recurring safety briefings and JHAs</span></div>
+        <div style="background:white;border:1px solid #fcd99a;border-radius:10px;padding:12px;font-size:0.85rem;"><strong>✉️ Student Communications</strong><br><span style="color:#555;">Templates for emails, progress reports, and follow-ups</span></div>
+        <div style="background:white;border:1px solid #fcd99a;border-radius:10px;padding:12px;font-size:0.85rem;"><strong>📋 Policy & Procedures</strong><br><span style="color:#555;">Develop institutional documents with consistent formatting</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🤖 Claude Models — Haiku, Sonnet & Opus</h3>
+    <p style="color:#666;font-size:0.9rem;margin-bottom:18px;">Claude comes in three models. Use the model selector at the bottom of the chat input to switch between them.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;">
+      <div style="border:2px solid #68d391;border-radius:16px;overflow:hidden;">
+        <div style="background:#68d391;padding:14px;text-align:center;"><div style="font-size:2rem;margin-bottom:4px;">⚡</div><div style="font-weight:800;font-size:1rem;color:#1a4731;">Haiku</div><div style="font-size:0.75rem;color:#1a4731;margin-top:2px;">Fast & Lightweight</div></div>
+        <div style="padding:14px;background:white;font-size:0.82rem;color:#2d3748;line-height:1.7;"><div style="margin-bottom:8px;">🚀 <strong>Speed:</strong> Fastest</div><div style="margin-bottom:8px;">🎯 <strong>Best for:</strong> Quick questions, simple tasks</div><div>📋 <strong>Example:</strong> "What does LOTO stand for?"</div></div>
+      </div>
+      <div style="border:2px solid #F4A21E;border-radius:16px;overflow:hidden;">
+        <div style="background:#F4A21E;padding:14px;text-align:center;"><div style="font-size:2rem;margin-bottom:4px;">⚖️</div><div style="font-weight:800;font-size:1rem;color:#1B2A4A;">Sonnet</div><div style="font-size:0.75rem;color:#1B2A4A;margin-top:2px;">Balanced & Reliable</div></div>
+        <div style="padding:14px;background:white;font-size:0.82rem;color:#2d3748;line-height:1.7;"><div style="margin-bottom:8px;">⚖️ <strong>Speed:</strong> Fast with more depth</div><div style="margin-bottom:8px;">🎯 <strong>Best for:</strong> Everyday work — writing, analysis</div><div>📋 <strong>Example:</strong> Safety briefings, quizzes, emails</div></div>
+      </div>
+      <div style="border:2px solid #3d6fa8;border-radius:16px;overflow:hidden;">
+        <div style="background:#1B2A4A;padding:14px;text-align:center;"><div style="font-size:2rem;margin-bottom:4px;">🧠</div><div style="font-weight:800;font-size:1rem;color:#F4A21E;">Opus</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.8);margin-top:2px;">Most Powerful</div></div>
+        <div style="padding:14px;background:white;font-size:0.82rem;color:#2d3748;line-height:1.7;"><div style="margin-bottom:8px;">🐢 <strong>Speed:</strong> Slower, deepest reasoning</div><div style="margin-bottom:8px;">🎯 <strong>Best for:</strong> Complex multi-step projects</div><div>📋 <strong>Example:</strong> Full curriculum builds, policy reviews</div></div>
+      </div>
+    </div>
+    <div style="background:#1B2A4A;border-radius:14px;padding:18px 20px;">
+      <div style="font-weight:700;color:#F4A21E;margin-bottom:12px;font-size:0.9rem;">🎯 Quick Pick Guide</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;gap:10px;align-items:center;background:rgba(255,255,255,0.06);border-radius:8px;padding:9px 12px;"><span>⚡</span><span style="color:rgba(255,255,255,0.9);font-size:0.85rem;">"I need a quick answer" → <strong style="color:#68d391;">Use Haiku</strong></span></div>
+        <div style="display:flex;gap:10px;align-items:center;background:rgba(255,255,255,0.06);border-radius:8px;padding:9px 12px;"><span>⚖️</span><span style="color:rgba(255,255,255,0.9);font-size:0.85rem;">"I need solid writing or analysis" → <strong style="color:#F4A21E;">Use Sonnet</strong></span></div>
+        <div style="display:flex;gap:10px;align-items:center;background:rgba(255,255,255,0.06);border-radius:8px;padding:9px 12px;"><span>🧠</span><span style="color:rgba(255,255,255,0.9);font-size:0.85rem;">"I have a complex, multi-step project" → <strong style="color:#76e4f7;">Use Opus</strong></span></div>
+      </div>
+      <div style="color:rgba(255,255,255,0.55);font-size:0.78rem;margin-top:12px;">💡 When in doubt, start with <strong style="color:#F4A21E;">Sonnet</strong> — it handles most NLC tasks excellently.</div>
+    </div>
+  </div>
+
+  <!-- Project Creation Demo -->
+  <div class="card">
+    <h3>🖥️ Interactive Demo — Creating a Project & Building a Dashboard</h3>
+    <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">Watch how to create a Project in Claude and then ask Claude to build a dashboard inside it.</p>
+    <div style="border:1px solid #dde3ed;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);position:relative;">
+      <div style="background:#1B2A4A;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;gap:10px;"><div style="width:10px;height:10px;border-radius:50%;background:#ff5f57;"></div><div style="width:10px;height:10px;border-radius:50%;background:#febc2e;"></div><div style="width:10px;height:10px;border-radius:50%;background:#28c840;"></div></div>
+        <div style="color:#F4A21E;font-weight:700;font-size:0.85rem;letter-spacing:1px;">claude.ai</div>
+        <div style="width:60px;"></div>
+      </div>
+      <div style="display:flex;min-height:400px;">
+        <div style="background:#f8f9fb;width:180px;flex-shrink:0;border-right:1px solid #e8ecf2;padding:14px 10px;">
+          <div style="background:#1B2A4A;color:white;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-weight:700;text-align:center;margin-bottom:14px;">+ New Chat</div>
+          <div style="font-size:0.7rem;color:#999;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Projects</div>
+          <div id="proj-sidebar-project" style="display:none;padding:7px 8px;border-radius:8px;font-size:0.78rem;color:#1B2A4A;background:#fffbf0;font-weight:600;border-left:3px solid #F4A21E;margin-bottom:4px;">📁 Safety Curriculum</div>
+          <div style="font-size:0.7rem;color:#999;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;margin-top:10px;">Recent</div>
+          <div style="padding:7px 8px;border-radius:8px;font-size:0.78rem;color:#888;">⚡ Safety Briefing</div>
+          <div style="padding:7px 8px;border-radius:8px;font-size:0.78rem;color:#888;margin-top:4px;">📄 Quiz Writing</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;background:white;position:relative;">
+          <div id="proj-modal" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.45);z-index:50;align-items:center;justify-content:center;">
+            <div style="background:white;border-radius:16px;padding:28px;width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+              <div style="font-weight:800;color:#1B2A4A;font-size:1rem;margin-bottom:6px;">📁 New Project</div>
+              <div style="color:#666;font-size:0.82rem;margin-bottom:16px;">Give your project a name and add instructions so Claude knows the context every time.</div>
+              <div style="background:#f5f7fa;border:1.5px solid #dde3ed;border-radius:8px;padding:10px 12px;font-size:0.85rem;color:#1B2A4A;font-weight:600;margin-bottom:10px;">Safety Curriculum 2025</div>
+              <div style="background:#f5f7fa;border:1.5px solid #dde3ed;border-radius:8px;padding:10px 12px;font-size:0.82rem;color:#555;margin-bottom:16px;line-height:1.5;">I am a lineman instructor at NLC. Always write for an apprentice audience and use field-relevant examples.</div>
+              <div style="background:#1B2A4A;color:#F4A21E;border-radius:10px;padding:10px;text-align:center;font-weight:700;font-size:0.88rem;">Create Project ✓</div>
+            </div>
+          </div>
+          <div id="proj-chat" style="flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;min-height:310px;">
+            <div id="proj-intro" style="text-align:center;margin:auto;">
+              <div style="font-size:2.5rem;margin-bottom:10px;">📁</div>
+              <div style="font-weight:700;color:#1B2A4A;font-size:1rem;margin-bottom:6px;">Project Creation Demo</div>
+              <div style="color:#666;font-size:0.85rem;max-width:300px;margin:0 auto 16px;">See how to create a Project and ask Claude to build a Safety Dashboard inside it.</div>
+              <div style="background:#fffbf0;border:1px solid #F4A21E;border-radius:10px;padding:10px 14px;font-size:0.8rem;color:#7a5000;display:inline-block;">Click <strong>Step 1</strong> below to begin ↓</div>
+            </div>
+          </div>
+          <div style="border-top:1px solid #eee;padding:12px 16px;background:#fafafa;">
+            <div style="background:white;border:1.5px solid #dde3ed;border-radius:10px;padding:10px 14px;font-size:0.82rem;color:#aaa;display:flex;align-items:center;justify-content:space-between;">
+              <span id="proj-input-preview">Select a step below to begin...</span>
+              <div style="background:#1B2A4A;border-radius:6px;padding:4px 10px;color:#F4A21E;font-size:0.75rem;font-weight:700;">Send</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <div style="font-size:0.78rem;font-weight:700;color:#1B2A4A;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Click each step to walk through the demo:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button onclick="projStep(1)" id="proj-btn-1" style="padding:8px 16px;border-radius:20px;border:2px solid #1B2A4A;background:white;color:#1B2A4A;font-size:0.82rem;font-weight:700;cursor:pointer;">Step 1: Create Project</button>
+        <button onclick="projStep(2)" id="proj-btn-2" style="padding:8px 16px;border-radius:20px;border:2px solid #ddd;background:white;color:#aaa;font-size:0.82rem;font-weight:700;cursor:not-allowed;" disabled>Step 2: Project Created</button>
+        <button onclick="projStep(3)" id="proj-btn-3" style="padding:8px 16px;border-radius:20px;border:2px solid #ddd;background:white;color:#aaa;font-size:0.82rem;font-weight:700;cursor:not-allowed;" disabled>Step 3: Request Dashboard</button>
+        <button onclick="projStep(4)" id="proj-btn-4" style="padding:8px 16px;border-radius:20px;border:2px solid #ddd;background:white;color:#aaa;font-size:0.82rem;font-weight:700;cursor:not-allowed;" disabled>Step 4: Claude Builds It</button>
+        <button onclick="projStep(5)" id="proj-btn-5" style="padding:8px 16px;border-radius:20px;border:2px solid #ddd;background:white;color:#aaa;font-size:0.82rem;font-weight:700;cursor:not-allowed;" disabled>Step 5: Saved to Project</button>
+        <button onclick="projStep(0)" style="padding:8px 16px;border-radius:20px;border:2px solid #fc8181;background:white;color:#e53e3e;font-size:0.82rem;font-weight:700;cursor:pointer;">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MS365 Connector -->
+  <div class="card">
+    <h3>🔗 Connecting Microsoft 365 to Claude</h3>
+    <p style="color:#444;line-height:1.75;margin-bottom:16px;">Claude can connect directly to your Microsoft 365 account — giving it the ability to search SharePoint, read Outlook emails, access OneDrive files, and review Teams conversations without manual uploads.</p>
+    <div style="font-weight:700;color:#1B2A4A;margin-bottom:12px;">👤 How to Connect:</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      <div style="display:flex;gap:14px;align-items:flex-start;"><div class="step-num">1</div><div style="padding-top:4px;"><strong style="color:#1B2A4A;">Open Settings</strong><br><span style="color:#555;font-size:0.9rem;">Click your <strong>profile icon</strong> in the bottom-left and select <strong>Settings</strong>.</span></div></div>
+      <div style="display:flex;gap:14px;align-items:flex-start;"><div class="step-num">2</div><div style="padding-top:4px;"><strong style="color:#1B2A4A;">Go to Connectors</strong><br><span style="color:#555;font-size:0.9rem;">Click <strong>Connectors</strong> in the left-hand settings menu.</span></div></div>
+      <div style="display:flex;gap:14px;align-items:flex-start;"><div class="step-num">3</div><div style="padding-top:4px;"><strong style="color:#1B2A4A;">Find Microsoft 365</strong><br><span style="color:#555;font-size:0.9rem;">Locate <strong>Microsoft 365</strong> and click <strong>Connect</strong>.</span></div></div>
+      <div style="display:flex;gap:14px;align-items:flex-start;"><div class="step-num">4</div><div style="padding-top:4px;"><strong style="color:#1B2A4A;">Sign In with Microsoft</strong><br><span style="color:#555;font-size:0.9rem;">Authenticate with your <strong>Microsoft 365 credentials</strong> (your NLC work email and password).</span></div></div>
+      <div style="display:flex;gap:14px;align-items:flex-start;"><div class="step-num">5</div><div style="padding-top:4px;"><strong style="color:#1B2A4A;">Accept Permissions</strong><br><span style="color:#555;font-size:0.9rem;">Review and accept permissions. Microsoft 365 will show as <strong>Connected</strong>.</span></div></div>
+    </div>
+    <div style="background:#fffbf0;border:1px solid #F4A21E;border-radius:12px;padding:16px;margin-bottom:14px;">
+      <div style="font-weight:700;color:#1B2A4A;margin-bottom:10px;">⚡ What You Can Ask Once Connected</div>
+      <div class="prompt-example" onclick="copyPrompt(this)" style="margin:0 0 8px;">"Find the latest safety curriculum document in our SharePoint and summarize it."</div>
+      <div class="prompt-example" onclick="copyPrompt(this)" style="margin:0 0 8px;">"Review my Outlook emails from this week about the apprentice program and list action items."</div>
+      <div class="prompt-example" onclick="copyPrompt(this)" style="margin:0 0 8px;">"Summarize the key decisions from yesterday's Teams chat in the #training channel."</div>
+      <div class="prompt-example" onclick="copyPrompt(this)" style="margin:0;">"Find all onboarding documents in OneDrive from the last 30 days."</div>
+    </div>
+    <div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:12px;padding:14px 16px;">
+      <div style="font-weight:700;color:#276749;margin-bottom:6px;font-size:0.88rem;">🔒 Security Note</div>
+      <p style="color:#276749;font-size:0.85rem;line-height:1.6;">Claude only accesses data you already have permission to see. The connector is <strong>read-only</strong> — Claude cannot modify, delete, or create content. <a href="https://support.claude.com/en/articles/12542951-enabling-and-using-the-microsoft-365-connector" target="_blank" style="color:#276749;font-weight:700;">Full setup guide ↗</a></p>
+    </div>
+  </div>
+
+  <!-- Privacy & Sharing -->
+  <div class="card">
+    <h3>🔒 Making Chats & Projects Private or Shared with Quanta Services</h3>
+    <p style="color:#444;line-height:1.75;margin-bottom:16px;">By default, everything in Claude is private — only you can see your chats and projects.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+      <div style="border:2px solid #1B2A4A;border-radius:14px;overflow:hidden;"><div style="background:#1B2A4A;padding:12px;text-align:center;"><div style="font-size:1.5rem;margin-bottom:4px;">🔒</div><div style="font-weight:800;color:#F4A21E;font-size:0.88rem;">Private</div></div><div style="padding:14px;background:white;font-size:0.83rem;color:#444;line-height:1.7;"><div>• Only <strong>you</strong> can see it</div><div>• Default for all new chats</div><div>• Best for personal or sensitive work</div></div></div>
+      <div style="border:2px solid #F4A21E;border-radius:14px;overflow:hidden;"><div style="background:#F4A21E;padding:12px;text-align:center;"><div style="font-size:1.5rem;margin-bottom:4px;">👥</div><div style="font-weight:800;color:#1B2A4A;font-size:0.88rem;">Shared (Invited)</div></div><div style="padding:14px;background:white;font-size:0.83rem;color:#444;line-height:1.7;"><div>• Only <strong>people you invite</strong> can see it</div><div>• Share by name or email</div><div>• Choose Can View or Can Edit</div></div></div>
+      <div style="border:2px solid #48bb78;border-radius:14px;overflow:hidden;"><div style="background:#48bb78;padding:12px;text-align:center;"><div style="font-size:1.5rem;margin-bottom:4px;">🌐</div><div style="font-weight:800;color:#1a4731;font-size:0.88rem;">Shared (Everyone)</div></div><div style="padding:14px;background:white;font-size:0.83rem;color:#444;line-height:1.7;"><div>• <strong>All Quanta members</strong> on Claude</div><div>• Best for shared org-wide resources</div><div>• Still set View or Edit permissions</div></div></div>
+    </div>
+    <div style="background:#f0f5ff;border:1px solid #b3c8f0;border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="font-weight:700;color:#1B2A4A;margin-bottom:12px;">🔑 Permission Levels</div>
+      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;"><div style="background:#1B2A4A;color:white;border-radius:8px;padding:3px 12px;font-size:0.78rem;font-weight:700;white-space:nowrap;flex-shrink:0;margin-top:2px;">Can View</div><div style="font-size:0.88rem;color:#444;line-height:1.6;">Members can see project contents and chat within it — but <strong>cannot make any changes</strong>.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div style="background:#F4A21E;color:#1B2A4A;border-radius:8px;padding:3px 12px;font-size:0.78rem;font-weight:700;white-space:nowrap;flex-shrink:0;margin-top:2px;">Can Edit</div><div style="font-size:0.88rem;color:#444;line-height:1.6;">Members can <strong>modify project instructions</strong>, add files, and update member settings.</div></div>
+    </div>
+    <div style="font-weight:700;color:#1B2A4A;margin-bottom:10px;">📁 How to Share a Project</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div class="step-sm">1</div><div style="font-size:0.9rem;color:#444;line-height:1.6;padding-top:3px;">Open your project and click the <strong>Share</strong> button next to the project name.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div class="step-sm">2</div><div style="font-size:0.9rem;color:#444;line-height:1.6;padding-top:3px;">Type a <strong>name or email</strong> to invite specific people, or paste a list of emails for bulk sharing.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div class="step-sm">3</div><div style="font-size:0.9rem;color:#444;line-height:1.6;padding-top:3px;">To share org-wide: click <strong>"Only people invited"</strong> and change to <strong>"Everyone at [your organization]."</strong></div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div class="step-sm">4</div><div style="font-size:0.9rem;color:#444;line-height:1.6;padding-top:3px;">Select <strong>Can View</strong> or <strong>Can Edit</strong>, then click <strong>Share</strong>.</div></div>
+    </div>
+    <div style="font-weight:700;color:#1B2A4A;margin-bottom:10px;">💬 How to Share a Chat</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div class="step-sm">1</div><div style="font-size:0.9rem;color:#444;line-height:1.6;padding-top:3px;">Open the chat and click the <strong>Share</strong> button in the upper-right corner.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div class="step-sm">2</div><div style="font-size:0.9rem;color:#444;line-height:1.6;padding-top:3px;">Copy the shareable link and send it to anyone at Quanta Services.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start;"><div class="step-sm">3</div><div style="font-size:0.9rem;color:#444;line-height:1.6;padding-top:3px;">To make it private again: open Share menu and change from <strong>Shared</strong> to <strong>Private</strong>.</div></div>
+    </div>
+    <div class="tip"><span class="tip-icon">📎</span><span class="tip-text">Shared chats do <strong>not</strong> include attached files or raw data from connected tools — only the conversation is visible.</span></div>
+    <div class="tip"><span class="tip-icon">🔒</span><span class="tip-text">When a project is <strong>archived</strong>, all sharing permissions are automatically reset to private.</span></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goTo(0)">← Back</button>
+    <button class="btn btn-primary" onclick="goTo(2)">Next: Writing Prompts →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODULE 3: WRITING PROMPTS -->
+<!-- ============================================================ -->
+<div class="module" id="mod-2">
+  <div class="module-header">
+    <div class="module-icon" style="background:#f0fff4;">✍️</div>
+    <div><h2>Writing Great Prompts</h2><p>The #1 skill to get the most out of Claude</p></div>
+  </div>
+
+  <div class="card">
+    <h3>Anatomy of a Great Prompt</h3>
+    <p style="color:#666;margin-bottom:14px;font-size:0.9rem;">The best prompts have up to 4 elements. More context = better results.</p>
+    <div class="prompt-anatomy">
+      <span class="hl-role">You are a technical training developer.</span> <span class="hl-ctx">I work at Northwest Lineman College and I'm building a new module on underground cable fault locating.</span> <span class="hl-task">Write a learning objective for this module aimed at apprentice linemen.</span> <span class="hl-fmt">Use the format: "After completing this module, students will be able to..." Keep it to one sentence.</span>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#F4A21E;"></div> Role (optional)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#68d391;"></div> Context / Background</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#76e4f7;"></div> Task (what you want)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d6bcfa;"></div> Format / Constraints</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Example Prompts — Click to Copy</h3>
+    <div class="prompt-example" onclick="copyPrompt(this)">Summarize the following email and list any action items I need to take: [paste email here]</div>
+    <div class="prompt-example" onclick="copyPrompt(this)">Act as a technical editor. Make these instructions clearer for a first-year apprentice: [paste text here]</div>
+    <div class="prompt-example" onclick="copyPrompt(this)">Explain the difference between series and parallel circuits like I've never worked in electricity before. Use a simple analogy.</div>
+    <div class="prompt-example" onclick="copyPrompt(this)">Write a professional but friendly follow-up email to a student who missed their scheduled lab session.</div>
+    <div class="prompt-example" onclick="copyPrompt(this)">I need to choose between two approaches to teaching this topic. Here's my situation: [describe]. Give me pros and cons for each option.</div>
+  </div>
+
+  <div class="card">
+    <h3>Do's and Don'ts</h3>
+    <div class="do-dont">
+      <div class="do"><h4>✅ Do This</h4><ul><li>Be specific about what you want</li><li>Give background/context</li><li>Specify the format (email, bullet list, outline)</li><li>Mention your audience</li><li>Follow up to refine the answer</li></ul></div>
+      <div class="dont"><h4>❌ Avoid This</h4><ul><li>Vague one-word prompts ("help")</li><li>Assuming Claude knows your role</li><li>Asking multiple unrelated things at once</li><li>Giving up after one bad response</li></ul></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goTo(1)">← Back</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Next: NLC Use Cases →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODULE 4: NLC USE CASES -->
+<!-- ============================================================ -->
+<div class="module" id="mod-3">
+  <div class="module-header">
+    <div class="module-icon" style="background:#fffbeb;">⚡</div>
+    <div><h2>NLC Use Cases</h2><p>How Claude helps in your day-to-day work at Northwest Lineman College</p></div>
+  </div>
+
+  <div class="card">
+    <h3>🎓 Instructors & Curriculum Development</h3>
+    <div class="prompt-example" onclick="copyPrompt(this)">Write a 5-question multiple choice quiz on transformer theory for journeyman-level linemen. Include an answer key.</div>
+    <div class="prompt-example" onclick="copyPrompt(this)">Create a lesson outline for a 2-hour lab session on climbing technique safety fundamentals for first-week apprentices.</div>
+    <div class="prompt-example" onclick="copyPrompt(this)">Rewrite this procedure in plain, step-by-step language that a new apprentice can follow without prior experience: [paste procedure]</div>
+  </div>
+
+  <div class="card">
+    <h3>🦺 Safety & Compliance</h3>
+    <div class="prompt-example" onclick="copyPrompt(this)">Summarize the key OSHA 1910.269 requirements for working on energized lines in plain language for a pre-shift safety briefing.</div>
+    <div style="margin:-6px 0 10px 4px;font-size:0.78rem;">🔗 Verify: <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.269" target="_blank" style="color:#1B2A4A;font-weight:700;">OSHA 1910.269 Official Standard ↗</a></div>
+    <div class="prompt-example" onclick="copyPrompt(this)">Draft a job briefing checklist for a crew preparing to set poles on a rural distribution line.</div>
+    <div style="margin:-6px 0 10px 4px;font-size:0.78rem;">🔗 Verify: <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.269" target="_blank" style="color:#1B2A4A;font-weight:700;">OSHA 1910.269 ↗</a></div>
+    <div class="prompt-example" onclick="copyPrompt(this)">What are the main differences between rubber gloving and hot stick work methods? Give me a comparison table.</div>
+    <div style="margin:-6px 0 10px 4px;font-size:0.78rem;">🔗 Verify: <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.269" target="_blank" style="color:#1B2A4A;font-weight:700;">OSHA 1910.269 ↗</a> · <a href="https://standards.ieee.org/ieee/NESC/11296/" target="_blank" style="color:#1B2A4A;font-weight:700;">NESC (IEEE) ↗</a></div>
+  </div>
+
+  <div class="card">
+    <h3>📋 Administrative & Operations</h3>
+    <div class="prompt-example" onclick="copyPrompt(this)">Write a professional email to a utility company partner thanking them for hosting NLC students for a field visit last week.</div>
+    <div class="prompt-example" onclick="copyPrompt(this)">Help me write a student progress report for an apprentice who is technically strong but struggles with following written procedures.</div>
+    <div class="prompt-example" onclick="copyPrompt(this)">Create an agenda for a 1-hour staff meeting to discuss curriculum updates for the underground distribution program.</div>
+  </div>
+
+  <div class="card">
+    <h3>🔌 Technical Reference & Explanation</h3>
+    <div class="prompt-example" onclick="copyPrompt(this)">Explain how a recloser works and when utilities typically use them versus fuses on a distribution system.</div>
+    <div style="margin:-6px 0 10px 4px;font-size:0.78rem;">🔗 Verify: <a href="https://standards.ieee.org/ieee/NESC/11296/" target="_blank" style="color:#1B2A4A;font-weight:700;">NESC (IEEE) ↗</a></div>
+    <div class="prompt-example" onclick="copyPrompt(this)">What are common causes of cable insulation failure in direct-buried URD systems? List them with brief explanations.</div>
+    <div style="margin:-6px 0 10px 4px;font-size:0.78rem;">🔗 Verify: <a href="https://www.nfpa.org/codes-and-standards/nfpa-70-standard-for-electrical-installations/70" target="_blank" style="color:#1B2A4A;font-weight:700;">NEC (NFPA 70) ↗</a> · <a href="https://standards.ieee.org/ieee/NESC/11296/" target="_blank" style="color:#1B2A4A;font-weight:700;">NESC (IEEE) ↗</a></div>
+    <div class="prompt-example" onclick="copyPrompt(this)">Describe the process for phasing out a distribution line before energizing, in language appropriate for a student handout.</div>
+    <div style="margin:-6px 0 10px 4px;font-size:0.78rem;">🔗 Verify: <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.269" target="_blank" style="color:#1B2A4A;font-weight:700;">OSHA 1910.269 ↗</a> · <a href="https://standards.ieee.org/ieee/NESC/11296/" target="_blank" style="color:#1B2A4A;font-weight:700;">NESC (IEEE) ↗</a></div>
+  </div>
+
+  <div class="card">
+    <h3>⚡ Try It Now — Pick a Scenario for Your Role</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:12px;padding:14px 16px;"><div style="font-weight:700;font-size:0.85rem;color:#1B2A4A;margin-bottom:6px;">👷 Instructor</div><div class="prompt-example" onclick="copyPrompt(this)" style="margin:0;">Write 3 quiz questions on overhead conductor stringing procedures for second-year apprentices. Include answers.</div></div>
+      <div style="background:#fff8f0;border:1px solid #fcd99a;border-radius:12px;padding:14px 16px;"><div style="font-weight:700;font-size:0.85rem;color:#1B2A4A;margin-bottom:6px;">🦺 Safety Staff</div><div class="prompt-example" onclick="copyPrompt(this)" style="margin:0;">Write a 5-point tailgate safety talk for a crew preparing to set poles in a residential neighborhood.</div></div>
+      <div style="background:#f0f5ff;border:1px solid #b3c8f0;border-radius:12px;padding:14px 16px;"><div style="font-weight:700;font-size:0.85rem;color:#1B2A4A;margin-bottom:6px;">📋 Admin / Operations</div><div class="prompt-example" onclick="copyPrompt(this)" style="margin:0;">Draft a professional email to a utility partner thanking them for hosting NLC students for a week-long field rotation.</div></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goTo(2)">← Back</button>
+    <button class="btn btn-primary" onclick="goTo(4)">Next: Tips & Security →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODULE 5: TIPS & SECURITY -->
+<!-- ============================================================ -->
+<div class="module" id="mod-4">
+  <div class="module-header">
+    <div class="module-icon" style="background:#fff5f5;">💡</div>
+    <div><h2>Tips & Security</h2><p>Work smarter and keep Quanta data safe</p></div>
+  </div>
+
+  <div class="card">
+    <h3>🎟️ Standard vs. Enterprise License — What's the Difference?</h3>
+    <p style="color:#444;line-height:1.75;margin-bottom:18px;">Understanding your license type helps you use Claude more efficiently and know when it's appropriate to request an upgrade through Quanta Services.</p>
+
+    <!-- License comparison -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;">
+
+      <!-- Standard / Team -->
+      <div style="border:2px solid #1B2A4A;border-radius:16px;overflow:hidden;">
+        <div style="background:#1B2A4A;padding:16px;text-align:center;">
+          <div style="font-size:1.8rem;margin-bottom:6px;">👤</div>
+          <div style="font-weight:800;color:#F4A21E;font-size:0.95rem;">Standard (Team Plan)</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:3px;">Most Quanta users</div>
+        </div>
+        <div style="padding:16px;background:white;font-size:0.83rem;color:#444;line-height:1.8;">
+          <div style="display:flex;gap:8px;margin-bottom:8px;"><span style="color:#48bb78;">✅</span><span><strong>200,000 token</strong> context window per conversation (~150,000 words or ~500 pages)</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;"><span style="color:#48bb78;">✅</span><span>Per-seat usage limits that reset on a rolling basis</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;"><span style="color:#48bb78;">✅</span><span>Access to all 3 models — Haiku, Sonnet, Opus</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;"><span style="color:#48bb78;">✅</span><span>Projects, memory, MS365 connector, sharing</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;"><span style="color:#F4A21E;">⚠️</span><span>Usage limits apply per seat — heavy use may hit caps</span></div>
+          <div style="display:flex;gap:8px;"><span style="color:#F4A21E;">⚠️</span><span>Context window resets with each new conversation</span></div>
+        </div>
+      </div>
+
+      <!-- Enterprise -->
+      <div style="border:2px solid #F4A21E;border-radius:16px;overflow:hidden;">
+        <div style="background:#F4A21E;padding:16px;text-align:center;">
+          <div style="font-size:1.8rem;margin-bottom:6px;">🏢</div>
+          <div style="font-weight:800;color:#1B2A4A;font-size:0.95rem;">Enterprise Plan</div>
+          <div style="font-size:0.75rem;color:#1B2A4A;opacity:0.75;margin-top:3px;">High-volume or compliance needs</div>
+        </div>
+        <div style="padding:16px;background:white;font-size:0.83rem;color:#444;line-height:1.8;">
+          <div style="display:flex;gap:8px;margin-bottom:8px;"><span style="color:#48bb78;">✅</span><span><strong>Shared organizational token pool</strong> — no per-seat limits, usage billed by consumption</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;"><span style="color:#48bb78;">✅</span><span>Larger context windows available (up to 1M tokens in beta)</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;"><span style="color:#48bb78;">✅</span><span>SSO, audit logs, SCIM, domain capture</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;"><span style="color:#48bb78;">✅</span><span>Admin spending caps at org and user level</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;"><span style="color:#48bb78;">✅</span><span>HIPAA-ready options available</span></div>
+          <div style="display:flex;gap:8px;"><span style="color:#48bb78;">✅</span><span>Dedicated support and compliance features</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What is a token? -->
+    <div style="background:#f0f5ff;border:1px solid #b3c8f0;border-radius:12px;padding:16px;margin-bottom:20px;">
+      <div style="font-weight:700;color:#1B2A4A;margin-bottom:10px;">🔤 What Is a Token?</div>
+      <p style="font-size:0.88rem;color:#444;line-height:1.7;margin-bottom:10px;">Tokens are the units Claude uses to process text — both what you send and what it responds with. Think of tokens as roughly <strong>¾ of a word</strong>.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:0.82rem;">
+        <div style="background:white;border-radius:10px;padding:12px;text-align:center;border:1px solid #dde8f8;"><div style="font-size:1.4rem;margin-bottom:4px;">📄</div><div style="font-weight:700;color:#1B2A4A;">~750 words</div><div style="color:#666;">= 1,000 tokens</div></div>
+        <div style="background:white;border-radius:10px;padding:12px;text-align:center;border:1px solid #dde8f8;"><div style="font-size:1.4rem;margin-bottom:4px;">📃</div><div style="font-weight:700;color:#1B2A4A;">~75,000 words</div><div style="color:#666;">= 100,000 tokens (~300 pages)</div></div>
+        <div style="background:white;border-radius:10px;padding:12px;text-align:center;border:1px solid #dde8f8;"><div style="font-size:1.4rem;margin-bottom:4px;">📚</div><div style="font-weight:700;color:#1B2A4A;">~150,000 words</div><div style="color:#666;">= 200,000 tokens (standard limit)</div></div>
+      </div>
+      <p style="font-size:0.82rem;color:#666;margin-top:10px;">Every message you send AND every response Claude gives uses tokens from your context window. Long conversations or large uploaded files consume tokens faster.</p>
+    </div>
+
+    <!-- When to request Enterprise -->
+    <div style="background:#fffbf0;border:1px solid #F4A21E;border-radius:12px;padding:16px;margin-bottom:20px;">
+      <div style="font-weight:700;color:#1B2A4A;margin-bottom:12px;">📋 When Should You Request Enterprise?</div>
+      <p style="font-size:0.88rem;color:#555;line-height:1.6;margin-bottom:12px;">Contact your IT administrator or Quanta AI program owner to request an Enterprise license upgrade if you experience any of the following:</p>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:0.85rem;">
+        <div style="display:flex;gap:10px;align-items:flex-start;background:white;border-radius:8px;padding:10px 12px;border:1px solid #fcd99a;"><span style="color:#F4A21E;flex-shrink:0;font-size:1rem;">🔴</span><span><strong>Hitting usage limits regularly</strong> — if you're getting "usage limit reached" messages multiple times a week</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:white;border-radius:8px;padding:10px 12px;border:1px solid #fcd99a;"><span style="color:#F4A21E;flex-shrink:0;font-size:1rem;">🔴</span><span><strong>Processing very large documents</strong> — multiple lengthy files that exceed the 200K token window in a single session</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:white;border-radius:8px;padding:10px 12px;border:1px solid #fcd99a;"><span style="color:#F4A21E;flex-shrink:0;font-size:1rem;">🔴</span><span><strong>Team-wide heavy usage</strong> — multiple people on your team hitting limits simultaneously</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:white;border-radius:8px;padding:10px 12px;border:1px solid #fcd99a;"><span style="color:#F4A21E;flex-shrink:0;font-size:1rem;">🔴</span><span><strong>Compliance requirements</strong> — your work involves HIPAA-regulated data, audit logs, or SSO requirements</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:white;border-radius:8px;padding:10px 12px;border:1px solid #fcd99a;"><span style="color:#F4A21E;flex-shrink:0;font-size:1rem;">🔴</span><span><strong>Departmental or org-wide deployment</strong> — rolling Claude out to an entire team or business unit</span></div>
+      </div>
+    </div>
+
+    <!-- Token optimization tips -->
+    <div style="background:#1B2A4A;border-radius:14px;padding:20px 24px;">
+      <div style="font-weight:800;color:#F4A21E;margin-bottom:6px;font-size:0.95rem;">⚡ How to Maximize Your Token Usage — So You Don't Need an Upgrade</div>
+      <p style="color:rgba(255,255,255,0.75);font-size:0.83rem;margin-bottom:16px;">Most users will never need an Enterprise upgrade if they follow these smart habits. These techniques stretch your token budget and keep conversations running longer.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+
+        <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;">
+          <div style="color:#F4A21E;font-weight:700;font-size:0.88rem;margin-bottom:6px;">1️⃣ Start a New Chat When Switching to a New File or Topic</div>
+          <div style="color:rgba(255,255,255,0.88);font-size:0.85rem;line-height:1.6;">This is the most important habit. If you finish working on one document and want to start on a new uploaded file, <strong style="color:white;">start a fresh conversation inside your Project</strong> rather than continuing in the same chat. Each conversation gets a fresh 200K token window. Carrying a long conversation forward wastes tokens on old context you no longer need.</div>
+          <div style="background:rgba(244,162,30,0.15);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:0.82rem;color:#F4A21E;">💡 Example: Finished reviewing the safety manual? Start a new chat in your Project before uploading the training curriculum.</div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;">
+          <div style="color:#F4A21E;font-weight:700;font-size:0.88rem;margin-bottom:6px;">2️⃣ Keep Project Instructions Concise</div>
+          <div style="color:rgba(255,255,255,0.88);font-size:0.85rem;line-height:1.6;">Your Project instructions load into every conversation. If they're 2,000 words long, that's 2,000 words of tokens used before you even type your first message. <strong style="color:white;">Keep instructions focused and short</strong> — 2–4 sentences covering your role, audience, and tone is enough.</div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;">
+          <div style="color:#F4A21E;font-weight:700;font-size:0.88rem;margin-bottom:6px;">3️⃣ Remove Unused Files from Projects</div>
+          <div style="color:rgba(255,255,255,0.88);font-size:0.85rem;line-height:1.6;">Files uploaded to a Project's knowledge base load into context when relevant. <strong style="color:white;">Delete files you're no longer actively using</strong> to keep the knowledge base lean and avoid burning tokens on outdated documents.</div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;">
+          <div style="color:#F4A21E;font-weight:700;font-size:0.88rem;margin-bottom:6px;">4️⃣ Be Specific — Avoid Back-and-Forth</div>
+          <div style="color:rgba(255,255,255,0.88);font-size:0.85rem;line-height:1.6;">Every message and response uses tokens. A well-structured prompt that gets it right on the first try uses far fewer tokens than 5 rounds of vague follow-ups. <strong style="color:white;">Use the Role + Context + Task + Format formula</strong> from Module 3 to get the right answer faster.</div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;">
+          <div style="color:#F4A21E;font-weight:700;font-size:0.88rem;margin-bottom:6px;">5️⃣ Use Haiku for Simple Tasks</div>
+          <div style="color:rgba(255,255,255,0.88);font-size:0.85rem;line-height:1.6;">Quick questions, short edits, and simple lookups don't need Opus or Sonnet. <strong style="color:white;">Switch to Haiku for lightweight tasks</strong> — it's faster and uses your limit more efficiently, saving heavier models for complex work that actually needs them.</div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;">
+          <div style="color:#F4A21E;font-weight:700;font-size:0.88rem;margin-bottom:6px;">6️⃣ Summarize Long Conversations Before They Get Too Long</div>
+          <div style="color:rgba(255,255,255,0.88);font-size:0.85rem;line-height:1.6;">If you're deep into a long conversation and approaching the context limit, ask Claude to summarize what's been done so far, then <strong style="color:white;">start a new chat and paste just the summary</strong> as context. This resets your token window while preserving the important information.</div>
+          <div style="background:rgba(244,162,30,0.15);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:0.82rem;color:#F4A21E;">💡 Prompt to use: "Summarize everything we've covered in this conversation in 5 bullet points so I can continue in a new chat."</div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;">
+          <div style="color:#F4A21E;font-weight:700;font-size:0.88rem;margin-bottom:6px;">7️⃣ Upload Only What's Needed</div>
+          <div style="color:rgba(255,255,255,0.88);font-size:0.85rem;line-height:1.6;">Uploading a 300-page document when you only need Claude to review Chapter 4 wastes tokens. <strong style="color:white;">Paste or upload only the relevant section</strong> of a document when possible, rather than the entire file.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📡 How Data is Shared in Claude — Projects vs. Individual Chats</h3>
+    <p style="color:#444;line-height:1.75;margin-bottom:18px;">Understanding how your data flows in Claude is critical before you start using it at Quanta Services. The key difference comes down to <strong>how you use Claude</strong> — in an individual chat or inside a Project.</p>
+
+    <!-- Visual flow diagram -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+
+      <!-- Individual Chat -->
+      <div style="border:2px solid #1B2A4A;border-radius:16px;overflow:hidden;">
+        <div style="background:#1B2A4A;padding:14px;text-align:center;">
+          <div style="font-size:1.8rem;margin-bottom:6px;">💬</div>
+          <div style="font-weight:800;color:#F4A21E;font-size:0.95rem;">Individual Chat</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:3px;">Private by default</div>
+        </div>
+        <div style="padding:16px;background:white;">
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:0.83rem;color:#444;line-height:1.6;">
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="color:#48bb78;flex-shrink:0;font-size:1rem;">🔒</span><span><strong>Visible only to you.</strong> No one else at Quanta Services can see your individual chats unless you explicitly share them.</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="color:#48bb78;flex-shrink:0;font-size:1rem;">🔒</span><span><strong>Not searchable</strong> by your organization. Teammates cannot browse or find your chats.</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="color:#48bb78;flex-shrink:0;font-size:1rem;">🔒</span><span><strong>Sharing is manual and opt-in.</strong> You must click Share and send a link — it does not happen automatically.</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="color:#F4A21E;flex-shrink:0;font-size:1rem;">⚠️</span><span>Shared chat links <strong>only include messages sent before sharing</strong>. New messages stay private unless you update the snapshot.</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="color:#F4A21E;flex-shrink:0;font-size:1rem;">⚠️</span><span>Attached files and MS365 tool data are <strong>not included</strong> in shared links — only the conversation text is visible.</span></div>
+          </div>
+        </div>
+        <div style="background:#f0fff4;padding:10px 16px;border-top:1px solid #e2e8f0;font-size:0.8rem;color:#276749;font-weight:600;text-align:center;">✅ Best for: personal drafts, one-off tasks, private work</div>
+      </div>
+
+      <!-- Projects -->
+      <div style="border:2px solid #F4A21E;border-radius:16px;overflow:hidden;">
+        <div style="background:#F4A21E;padding:14px;text-align:center;">
+          <div style="font-size:1.8rem;margin-bottom:6px;">📁</div>
+          <div style="font-weight:800;color:#1B2A4A;font-size:0.95rem;">Projects</div>
+          <div style="font-size:0.75rem;color:#1B2A4A;opacity:0.75;margin-top:3px;">Searchable when shared org-wide</div>
+        </div>
+        <div style="padding:16px;background:white;">
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:0.83rem;color:#444;line-height:1.6;">
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="color:#48bb78;flex-shrink:0;font-size:1rem;">🔒</span><span><strong>Private by default</strong> when created. Only you can see it until you choose to share.</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="color:#3d6fa8;flex-shrink:0;font-size:1rem;">🌐</span><span>If shared org-wide, <strong>any Quanta Services member can browse and find your Project</strong> in the Team tab — including project name, instructions, and knowledge files.</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="color:#3d6fa8;flex-shrink:0;font-size:1rem;">🌐</span><span>Org-wide shared Projects are <strong>searchable</strong> — colleagues can search by project name or topic and find it.</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="color:#48bb78;flex-shrink:0;font-size:1rem;">🔒</span><span><strong>Your individual chats inside a shared project remain private</strong> to you unless you manually share each one.</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start;"><span style="color:#48bb78;flex-shrink:0;font-size:1rem;">🔒</span><span>Members only access <strong>data they already have permission</strong> to see — Claude respects existing permissions.</span></div>
+          </div>
+        </div>
+        <div style="background:#fffbf0;padding:10px 16px;border-top:1px solid #e2e8f0;font-size:0.8rem;color:#c47f00;font-weight:600;text-align:center;">⚡ Best for: team collaboration, shared resources, ongoing work</div>
+      </div>
+    </div>
+
+    <!-- Summary comparison table -->
+    <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:20px;">
+      <div style="background:#1B2A4A;padding:12px 16px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;">
+        <div style="color:#F4A21E;font-weight:700;font-size:0.82rem;">Feature</div>
+        <div style="color:#F4A21E;font-weight:700;font-size:0.82rem;text-align:center;">💬 Individual Chat</div>
+        <div style="color:#F4A21E;font-weight:700;font-size:0.82rem;text-align:center;">📁 Project</div>
+      </div>
+      <div style="background:white;">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;padding:10px 16px;border-bottom:1px solid #f0f0f0;font-size:0.82rem;"><div style="color:#444;">Private by default</div><div style="text-align:center;color:#48bb78;font-weight:700;">✅ Yes</div><div style="text-align:center;color:#48bb78;font-weight:700;">✅ Yes</div></div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;padding:10px 16px;border-bottom:1px solid #f0f0f0;font-size:0.82rem;background:#fafafa;"><div style="color:#444;">Searchable by org members</div><div style="text-align:center;color:#fc8181;font-weight:700;">❌ No</div><div style="text-align:center;color:#F4A21E;font-weight:700;">⚠️ If shared</div></div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;padding:10px 16px;border-bottom:1px solid #f0f0f0;font-size:0.82rem;"><div style="color:#444;">Chats visible to others</div><div style="text-align:center;color:#fc8181;font-weight:700;">❌ Only if you share</div><div style="text-align:center;color:#fc8181;font-weight:700;">❌ Only if you share</div></div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;padding:10px 16px;border-bottom:1px solid #f0f0f0;font-size:0.82rem;background:#fafafa;"><div style="color:#444;">Project knowledge/files visible to org</div><div style="text-align:center;color:#999;">N/A</div><div style="text-align:center;color:#F4A21E;font-weight:700;">⚠️ If shared</div></div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;padding:10px 16px;border-bottom:1px solid #f0f0f0;font-size:0.82rem;"><div style="color:#444;">Retains context across sessions</div><div style="text-align:center;color:#fc8181;font-weight:700;">❌ No</div><div style="text-align:center;color:#48bb78;font-weight:700;">✅ Yes</div></div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;padding:10px 16px;font-size:0.82rem;background:#fafafa;"><div style="color:#444;">Archived = permissions reset to private</div><div style="text-align:center;color:#999;">N/A</div><div style="text-align:center;color:#48bb78;font-weight:700;">✅ Yes</div></div>
+      </div>
+    </div>
+
+    <!-- Anthropic data handling -->
+    <div style="background:#1B2A4A;border-radius:14px;padding:18px 22px;">
+      <div style="font-weight:800;color:#F4A21E;margin-bottom:12px;font-size:0.9rem;">🔐 How Anthropic Handles Your Data</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;">
+          <span style="color:#68d391;flex-shrink:0;">✅</span>
+          <span style="color:rgba(255,255,255,0.9);font-size:0.88rem;line-height:1.6;"><strong style="color:white;">Not sold to third parties.</strong> Anthropic does not sell your conversations or data to advertisers or data brokers.</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;">
+          <span style="color:#68d391;flex-shrink:0;">✅</span>
+          <span style="color:rgba(255,255,255,0.9);font-size:0.88rem;line-height:1.6;"><strong style="color:white;">Enterprise/Team accounts are protected.</strong> On Quanta's Team or Enterprise plan, data is <strong>not used to train AI models</strong> — this protection is built into the commercial terms.</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;">
+          <span style="color:#F4A21E;flex-shrink:0;">⚠️</span>
+          <span style="color:rgba(255,255,255,0.9);font-size:0.88rem;line-height:1.6;"><strong style="color:white;">Anthropic can access conversations</strong> for safety monitoring and platform improvement — but only Anthropic, not other users or Quanta administrators.</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;">
+          <span style="color:#fc8181;flex-shrink:0;">🚫</span>
+          <span style="color:rgba(255,255,255,0.9);font-size:0.88rem;line-height:1.6;"><strong style="color:white;">Personal accounts are different.</strong> If you use a personal Free or Pro account, Anthropic may use your chats for model training. <strong>Always use your Quanta Services account.</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>✅ Quanta Services Approved AI Tools</h3>
+    <p style="color:#444;line-height:1.75;margin-bottom:18px;">Quanta Services has approved the following AI tools for use by employees. <strong>Only these tools are authorized</strong> — do not use any other AI platforms for work-related tasks without prior approval.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
+
+      <!-- Claude.ai -->
+      <div style="border:2px solid #1B2A4A;border-radius:16px;overflow:hidden;text-align:center;">
+        <div style="background:#1B2A4A;padding:20px 14px;">
+          <div style="font-size:2.4rem;margin-bottom:8px;">🤖</div>
+          <div style="font-weight:800;color:#F4A21E;font-size:1rem;">Claude.ai</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.75);margin-top:4px;">by Anthropic</div>
+        </div>
+        <div style="padding:16px;background:white;">
+          <div style="font-size:0.82rem;color:#444;line-height:1.7;text-align:left;">
+            <div style="margin-bottom:6px;">✅ Writing & drafting</div>
+            <div style="margin-bottom:6px;">✅ Research & analysis</div>
+            <div style="margin-bottom:6px;">✅ Curriculum development</div>
+            <div style="margin-bottom:6px;">✅ Safety documentation</div>
+            <div style="margin-bottom:10px;">✅ Projects & collaboration</div>
+            <a href="https://claude.ai" target="_blank" style="display:block;background:#1B2A4A;color:#F4A21E;border-radius:8px;padding:7px;text-align:center;font-weight:700;font-size:0.82rem;text-decoration:none;">Open Claude.ai ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copilot -->
+      <div style="border:2px solid #0078d4;border-radius:16px;overflow:hidden;text-align:center;">
+        <div style="background:#0078d4;padding:20px 14px;">
+          <div style="font-size:2.4rem;margin-bottom:8px;">🪟</div>
+          <div style="font-weight:800;color:white;font-size:1rem;">Microsoft Copilot</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.75);margin-top:4px;">by Microsoft</div>
+        </div>
+        <div style="padding:16px;background:white;">
+          <div style="font-size:0.82rem;color:#444;line-height:1.7;text-align:left;">
+            <div style="margin-bottom:6px;">✅ Microsoft 365 integration</div>
+            <div style="margin-bottom:6px;">✅ Word, Excel, Outlook</div>
+            <div style="margin-bottom:6px;">✅ Teams summaries</div>
+            <div style="margin-bottom:6px;">✅ Document drafting</div>
+            <div style="margin-bottom:10px;">✅ Web search & research</div>
+            <a href="https://copilot.microsoft.com" target="_blank" style="display:block;background:#0078d4;color:white;border-radius:8px;padding:7px;text-align:center;font-weight:700;font-size:0.82rem;text-decoration:none;">Open Copilot ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ChatGPT -->
+      <div style="border:2px solid #10a37f;border-radius:16px;overflow:hidden;text-align:center;">
+        <div style="background:#10a37f;padding:20px 14px;">
+          <div style="font-size:2.4rem;margin-bottom:8px;">💬</div>
+          <div style="font-weight:800;color:white;font-size:1rem;">ChatGPT</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.75);margin-top:4px;">by OpenAI</div>
+        </div>
+        <div style="padding:16px;background:white;">
+          <div style="font-size:0.82rem;color:#444;line-height:1.7;text-align:left;">
+            <div style="margin-bottom:6px;">✅ Writing & summarizing</div>
+            <div style="margin-bottom:6px;">✅ Brainstorming ideas</div>
+            <div style="margin-bottom:6px;">✅ Code assistance</div>
+            <div style="margin-bottom:6px;">✅ Q&A and explanations</div>
+            <div style="margin-bottom:10px;">✅ Image generation (GPT-4o)</div>
+            <a href="https://chatgpt.com" target="_blank" style="display:block;background:#10a37f;color:white;border-radius:8px;padding:7px;text-align:center;font-weight:700;font-size:0.82rem;text-decoration:none;">Open ChatGPT ↗</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Important note -->
+    <div style="background:#1B2A4A;border-radius:14px;padding:18px 22px;">
+      <div style="font-weight:800;color:#F4A21E;margin-bottom:12px;font-size:0.9rem;">📌 Important Reminders for All Approved Tools</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;">
+          <span style="color:#fc8181;flex-shrink:0;">🚫</span>
+          <span style="color:rgba(255,255,255,0.9);font-size:0.88rem;line-height:1.6;"><strong style="color:white;">The same data rules apply to ALL approved tools.</strong> Never enter PII, PHI, financial data, customer data, or sensitive Quanta information into any AI tool — approved or not.</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;">
+          <span style="color:#68d391;flex-shrink:0;">✅</span>
+          <span style="color:rgba(255,255,255,0.9);font-size:0.88rem;line-height:1.6;"><strong style="color:white;">Always verify critical outputs.</strong> No AI tool is 100% accurate. Double-check safety specs, code references, and regulatory information against official sources.</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;">
+          <span style="color:#F4A21E;flex-shrink:0;">⚠️</span>
+          <span style="color:rgba(255,255,255,0.9);font-size:0.88rem;line-height:1.6;"><strong style="color:white;">Only use approved tools.</strong> Using unauthorized AI platforms for Quanta work is a policy violation. If you're unsure whether a tool is approved, contact your IT department before using it.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔥 Power User Tips</h3>
+    <div class="tip"><span class="tip-icon">🔁</span><span class="tip-text"><strong>Iterate, don't restart:</strong> Follow up with "make it shorter," "use simpler language," or "add a field example" rather than starting over.</span></div>
+    <div class="tip"><span class="tip-icon">🎭</span><span class="tip-text"><strong>Assign a role:</strong> Start with "Act as a [lineman instructor / safety officer / curriculum designer]" for expert-style responses.</span></div>
+    <div class="tip"><span class="tip-icon">📝</span><span class="tip-text"><strong>Paste your content:</strong> Claude can read and improve things you paste in — procedures, emails, student evaluations, training scripts.</span></div>
+    <div class="tip"><span class="tip-icon">🖼️</span><span class="tip-text"><strong>Upload images or diagrams:</strong> Share line diagrams, equipment photos, or schematics and ask Claude to explain or describe them.</span></div>
+    <div class="tip"><span class="tip-icon">📁</span><span class="tip-text"><strong>Use Projects:</strong> For ongoing work like a curriculum unit or policy document, Projects keep context organized across multiple sessions.</span></div>
+  </div>
+
+  <div class="card">
+    <h3>🔐 Quanta Services — Data Security When Using Claude</h3>
+    <p style="color:#444;line-height:1.75;margin-bottom:18px;">When using Claude at Quanta Services, it is critical to understand what types of company data exist, what is confidential, and what should <strong>never</strong> be entered into Claude.</p>
+    <div style="background:#b91c1c;border-radius:12px 12px 0 0;padding:14px 20px;text-align:center;"><div style="color:white;font-weight:800;font-size:1.05rem;">Company Data Types</div></div>
+    <div style="border:2px solid #b91c1c;border-top:none;border-radius:0 0 12px 12px;margin-bottom:20px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;">
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #f0f0f0;border-right:1px solid #f0f0f0;"><div style="font-size:1.8rem;flex-shrink:0;">📊</div><div><strong style="color:#1B2A4A;">Financial Information</strong><br><span style="font-size:0.82rem;color:#555;">Financials, mergers & acquisitions, intellectual property</span></div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #f0f0f0;"><div style="font-size:1.8rem;flex-shrink:0;">👥</div><div><strong style="color:#1B2A4A;">Personal Identifiable Information (PII)</strong><br><span style="font-size:0.82rem;color:#555;">Names, SSNs, addresses, employee records</span></div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #f0f0f0;border-right:1px solid #f0f0f0;"><div style="font-size:1.8rem;flex-shrink:0;">🩺</div><div><strong style="color:#1B2A4A;">Protected Health Information (PHI)</strong><br><span style="font-size:0.82rem;color:#555;">Medical records, health data, injury information</span></div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #f0f0f0;"><div style="font-size:1.8rem;flex-shrink:0;">⚡</div><div><strong style="color:#1B2A4A;">Customer Information</strong><br><span style="font-size:0.82rem;color:#555;">Client data, designs, project documentation</span></div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-right:1px solid #f0f0f0;"><div style="font-size:1.8rem;flex-shrink:0;">🏭</div><div><strong style="color:#1B2A4A;">Sensitive Company Data</strong><br><span style="font-size:0.82rem;color:#555;">Proprietary processes, strategic plans, trade secrets</span></div></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;"><div style="font-size:1.8rem;flex-shrink:0;">🔒</div><div><strong style="color:#b91c1c;">None of the above should ever be entered into Claude without approval.</strong></div></div>
+      </div>
+    </div>
+
+    <div style="background:#b91c1c;border-radius:12px 12px 0 0;padding:14px 20px;"><div style="color:white;font-weight:800;font-size:1.05rem;">Confidential / Highly Confidential Information</div></div>
+    <div style="border:2px solid #b91c1c;border-top:none;border-radius:0 0 12px 12px;margin-bottom:20px;overflow:hidden;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;">
+        <div style="padding:20px;border-right:1px solid #eee;">
+          <div style="font-weight:700;color:#1B2A4A;margin-bottom:14px;">What are some examples?</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;gap:12px;align-items:flex-start;"><div style="background:#b91c1c;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">💰</div><div style="font-size:0.85rem;color:#444;line-height:1.5;">Company financials, mergers and acquisitions, and intellectual property</div></div>
+            <div style="display:flex;gap:12px;align-items:flex-start;"><div style="background:#b91c1c;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🪪</div><div style="font-size:0.85rem;color:#444;line-height:1.5;">Personal information such as a customer's full name, credit card number, or an employee's address</div></div>
+            <div style="display:flex;gap:12px;align-items:flex-start;"><div style="background:#b91c1c;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">📐</div><div style="font-size:0.85rem;color:#444;line-height:1.5;">Data from customers such as designs and other project documentation</div></div>
+          </div>
+        </div>
+        <div style="padding:20px;background:#b91c1c;">
+          <div style="font-weight:700;color:white;margin-bottom:14px;">Where is company information stored?</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="color:white;font-size:0.85rem;">▪ Email</div>
+            <div style="color:white;font-size:0.85rem;">▪ Desktops and laptops</div>
+            <div style="color:white;font-size:0.85rem;">▪ Server directories and file shares</div>
+            <div style="color:white;font-size:0.85rem;">▪ Removable storage devices (e.g., USB drives)</div>
+            <div style="color:white;font-size:0.85rem;">▪ Mobile devices</div>
+            <div style="color:white;font-size:0.85rem;">▪ Cloud storage</div>
+            <div style="color:white;font-size:0.85rem;">▪ Software applications</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#b91c1c;border-radius:12px 12px 0 0;padding:14px 20px;"><div style="color:white;font-weight:800;font-size:1.05rem;">Personal Information (PII) — What It Includes</div></div>
+    <div style="border:2px solid #b91c1c;border-top:none;border-radius:0 0 12px 12px;padding:20px;margin-bottom:20px;">
+      <p style="color:#444;font-size:0.88rem;line-height:1.7;margin-bottom:16px;">Personally identifiable information (PII) means any information relating to a particular individual who can be identified directly or indirectly. <strong>PII includes, but is not limited to:</strong></p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">👤 Person's first name (or initial) and last name</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">🧬 Physical, genetic, mental, economic, or cultural identity info</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">🔢 Social Security / Social Insurance number</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">🖐️ Biometric identifier</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">🪪 Driver's license or government-issued ID number</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">🏦 Financial account number</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">🏠 Physical address</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">💳 Credit card number</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">📧 Email address or other online identifier</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">📍 Geo-location data and real-world activity</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">📞 Telephone number</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">🌐 IP address and Internet activity</div>
+        <div style="background:#fff5f5;border-left:3px solid #b91c1c;border-radius:0 8px 8px 0;padding:8px 12px;font-size:0.82rem;color:#333;">🔑 Online account username and password</div>
+      </div>
+    </div>
+
+    <div style="background:#1B2A4A;border-radius:14px;padding:20px 24px;">
+      <div style="font-weight:800;color:#F4A21E;font-size:1rem;margin-bottom:14px;">🚨 The Golden Rule for Claude at Quanta Services</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;"><span style="color:#fc8181;font-size:1.1rem;flex-shrink:0;">🚫</span><span style="color:rgba(255,255,255,0.9);font-size:0.88rem;line-height:1.6;"><strong style="color:white;">Never enter PII, PHI, financial data, customer data, or sensitive company information into Claude.</strong> If the information would be confidential in an email, it should not be typed into Claude.</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;"><span style="color:#68d391;font-size:1.1rem;flex-shrink:0;">✅</span><span style="color:rgba(255,255,255,0.9);font-size:0.88rem;line-height:1.6;"><strong style="color:white;">Use Claude for general tasks</strong> — drafting, brainstorming, writing, explaining — using anonymized or non-sensitive information only.</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;"><span style="color:#F4A21E;font-size:1.1rem;flex-shrink:0;">❓</span><span style="color:rgba(255,255,255,0.9);font-size:0.88rem;line-height:1.6;"><strong style="color:white;">Not sure if it's okay to include?</strong> Ask yourself: "Would I be comfortable if this was shared publicly?" If no — don't include it.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>⚠️ Critical Limits</h3>
+    <div class="tip warning"><span class="tip-icon">🚫</span><span class="tip-text"><strong>Never rely on Claude alone for safety-critical specs.</strong> Always verify voltages, clearances, PPE ratings, and code references: <a href="https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.269" target="_blank" style="color:#c47f00;font-weight:700;">OSHA 1910.269 ↗</a> · <a href="https://standards.ieee.org/ieee/NESC/11296/" target="_blank" style="color:#c47f00;font-weight:700;">NESC ↗</a> · <a href="https://www.nfpa.org/codes-and-standards/nfpa-70-standard-for-electrical-installations/70" target="_blank" style="color:#c47f00;font-weight:700;">NEC ↗</a></span></div>
+    <div class="tip warning"><span class="tip-icon">🚫</span><span class="tip-text"><strong>Claude may not have the latest code updates.</strong> Always confirm current editions: <a href="https://www.osha.gov" target="_blank" style="color:#c47f00;font-weight:700;">OSHA ↗</a> · <a href="https://www.nfpa.org/codes-and-standards/nfpa-70-standard-for-electrical-installations/70" target="_blank" style="color:#c47f00;font-weight:700;">NFPA/NEC ↗</a> · <a href="https://standards.ieee.org/ieee/NESC/11296/" target="_blank" style="color:#c47f00;font-weight:700;">IEEE/NESC ↗</a></span></div>
+    <div class="tip warning"><span class="tip-icon">🚫</span><span class="tip-text"><strong>Don't paste confidential student data.</strong> Avoid entering SSNs, grades tied to full names, or protected information. See: <a href="https://studentprivacy.ed.gov/ferpa" target="_blank" style="color:#c47f00;font-weight:700;">FERPA ↗</a></span></div>
+  </div>
+
+  <div class="card">
+    <h3>🔒 Privacy Best Practices</h3>
+    <div class="tip"><span class="tip-icon">🔐</span><span class="tip-text">Avoid pasting sensitive personal information (student IDs, passwords, private records) into Claude.</span></div>
+    <div class="tip"><span class="tip-icon">🏢</span><span class="tip-text">Check with your supervisor or IT team before using Claude with confidential institutional documents or partner utility data.</span></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goTo(3)">← Back</button>
+    <button class="btn btn-primary" onclick="goTo(5)">Next: Quiz & Wrap-Up →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODULE 6: QUIZ & WRAP-UP -->
+<!-- ============================================================ -->
+<div class="module" id="mod-5">
+  <div class="module-header">
+    <div class="module-icon" style="background:#f0f7ff;">🎓</div>
+    <div><h2>Quiz & Wrap-Up</h2><p>Test your knowledge and grab your cheat sheet</p></div>
+  </div>
+
+  <div class="card">
+    <div class="quiz-question">Q1. What is the best way to improve a Claude response you're not satisfied with?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,'q1',false)">Start a completely new conversation from scratch</button>
+      <button class="quiz-opt" onclick="answer(this,'q1',true)">Follow up with clarifying instructions like "make it shorter" or "add a field example"</button>
+      <button class="quiz-opt" onclick="answer(this,'q1',false)">Repeat the exact same prompt again</button>
+      <button class="quiz-opt" onclick="answer(this,'q1',false)">Accept the first response — Claude only tries once</button>
+    </div>
+    <div class="quiz-result" id="q1-result"></div>
+  </div>
+
+  <div class="card">
+    <div class="quiz-question">Q2. An instructor wants Claude to write a quiz on transformer theory. Which prompt will get the best result?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,'q2',false)">"Write a quiz"</button>
+      <button class="quiz-opt" onclick="answer(this,'q2',false)">"Help me with transformers"</button>
+      <button class="quiz-opt" onclick="answer(this,'q2',true)">"Write a 5-question multiple choice quiz on single-phase transformer theory for journeyman-level linemen. Include an answer key."</button>
+      <button class="quiz-opt" onclick="answer(this,'q2',false)">"Do something about transformers for my class"</button>
+    </div>
+    <div class="quiz-result" id="q2-result"></div>
+  </div>
+
+  <div class="card">
+    <div class="quiz-question">Q3. A student asks Claude for the exact OSHA clearance distance for working near energized 345kV lines. What should they do with Claude's answer?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,'q3',false)">Use it directly — Claude is always accurate on technical specs</button>
+      <button class="quiz-opt" onclick="answer(this,'q3',false)">Only use it if the prompt was worded correctly</button>
+      <button class="quiz-opt" onclick="answer(this,'q3',true)">Use it as a starting point, but always verify against the official OSHA 1910.269 standard before acting on it</button>
+      <button class="quiz-opt" onclick="answer(this,'q3',false)">Ignore Claude entirely for any technical topics</button>
+    </div>
+    <div class="quiz-result" id="q3-result"></div>
+  </div>
+
+  <div id="completionSection" style="display:none;">
+    <div class="completion">
+      <div class="badge">🏆</div>
+      <h2>Training Complete!</h2>
+      <p>You're ready to start using Claude at Northwest Lineman College. Here's your NLC quick-reference cheat sheet:</p>
+      <div class="cheatsheet">
+        <h3>⚡ NLC Claude Quick Reference</h3>
+        <div class="cs-item"><div class="cs-key">Great Prompt</div><div class="cs-val">Role + Context + Task + Format — the more detail you give, the better the result</div></div>
+        <div class="cs-item"><div class="cs-key">Iterate</div><div class="cs-val">Follow up rather than restarting: "make it shorter," "simplify for apprentices," "add an example"</div></div>
+        <div class="cs-item"><div class="cs-key">Paste It</div><div class="cs-val">Paste emails, procedures, or student notes to get rewrites, summaries, or improvements</div></div>
+        <div class="cs-item"><div class="cs-key">Assign Roles</div><div class="cs-val">"Act as a lineman instructor / safety officer / curriculum developer" for expert-style responses</div></div>
+        <div class="cs-item"><div class="cs-key">Verify Safety</div><div class="cs-val">Always confirm safety specs, clearances, and codes against official OSHA, NESC, or NEC standards</div></div>
+        <div class="cs-item"><div class="cs-key">Stay Safe</div><div class="cs-val">Never paste PII, PHI, financial data, or sensitive Quanta information into Claude</div></div>
+        <div class="cs-item"><div class="cs-key">New Chat</div><div class="cs-val">Claude doesn't remember past conversations — use Projects for ongoing work</div></div>
+      </div>
+      <div style="margin-top:28px;">
+        <h3 style="color:#1B2A4A;margin-bottom:8px;">📚 Continue Your Learning</h3>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:16px;">Take Anthropic's official <strong>Claude 101</strong> course to go deeper — free to access, no Anthropic account required.</p>
+        <a href="https://anthropic.skilljar.com/claude-101" target="_blank" style="text-decoration:none;">
+          <div style="background:linear-gradient(135deg,#1B2A4A,#2e4a7a);border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+            <div style="display:flex;align-items:center;gap:16px;"><div style="font-size:2.2rem;">🎓</div><div><div style="color:#F4A21E;font-weight:800;font-size:1.05rem;">Anthropic Claude 101</div><div style="color:rgba(255,255,255,0.8);font-size:0.85rem;margin-top:3px;">Official free course · Hosted on Anthropic Academy</div></div></div>
+            <div style="background:#F4A21E;color:#1B2A4A;font-weight:700;font-size:0.85rem;padding:8px 18px;border-radius:20px;white-space:nowrap;">Start Course →</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goTo(4)">← Back</button>
+    <button class="btn btn-primary" disabled id="finishBtn">Finish Training ✓</button>
+  </div>
+</div>
+
+</div><!-- end container -->
+
+<script>
+  let current = 0;
+  const total = 6;
+  const quizAttempted = { q1: false, q2: false, q3: false };
+
+  function goTo(idx) {
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const oldMod = document.getElementById('mod-' + current);
+    const newMod = document.getElementById('mod-' + idx);
+    const oldBtn = navBtns[current];
+    const newBtn = navBtns[idx];
+    const bar = document.getElementById('progressBar');
+    if (oldMod) oldMod.classList.remove('active');
+    if (oldBtn) { oldBtn.classList.remove('active'); if (current < idx) oldBtn.classList.add('done'); }
+    current = idx;
+    if (newMod) newMod.classList.add('active');
+    if (newBtn) newBtn.classList.add('active');
+    if (bar) bar.style.width = ((current + 1) / total * 100) + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Dashboard demo
+  const demoSteps = [
+    { type:'reset' },
+    { type:'user', input:'Write a short pre-shift safety briefing for a crew about to work on a de-energized 12kV distribution line.', bubble:'Write a short pre-shift safety briefing for a crew about to work on a de-energized 12kV distribution line.' },
+    { type:'claude', bubble:'<strong>Pre-Shift Safety Briefing — De-Energized 12kV Distribution Line</strong><br><br>Good morning, team. Before we begin today\'s work, let\'s cover our key safety points:<br><br><strong>1. Verify De-Energization</strong> — Confirm the line has been de-energized, locked out, and tagged out per LOTO procedures. Do not assume — test before you touch.<br><br><strong>2. PPE Requirements</strong> — Class 2 rubber gloves and sleeves required. Hard hats, safety glasses, and hi-vis vests must be worn at all times.<br><br><strong>3. Establish the Work Zone</strong> — Set up barriers and signage. No unauthorized personnel within the work perimeter.<br><br><strong>4. Communication</strong> — One designated communicator with dispatch. Report any changes in line status immediately.<br><br><strong>5. Emergency Plan</strong> — Review nearest hospital route. First aid kit location: [specify].<br><br>Stay sharp. Any questions before we begin?' },
+    { type:'user', input:'Can you make it shorter — just 3 bullet points for a quick verbal briefing?', bubble:'Can you make it shorter — just 3 bullet points for a quick verbal briefing?' },
+    { type:'claude', bubble:'Absolutely! Here\'s the condensed version:<br><br><strong>Quick Pre-Shift Briefing — 3 Key Points</strong><br><br>• <strong>Verify LOTO</strong> — Line is de-energized, locked out, and tested. No assumptions.<br><br>• <strong>Wear your PPE</strong> — Class 2 rubber gloves and sleeves, hard hat, hi-vis. No exceptions.<br><br>• <strong>Know the emergency plan</strong> — Nearest hospital route confirmed, first aid kit at [location].<br><br>Any questions? Let\'s work safe today. ⚡' }
+  ];
+  let demoCurrentStep = 0;
+
+  function demoStep(step) {
+    const messages = document.getElementById('chat-messages');
+    const intro = document.getElementById('demo-intro');
+    const inputPreview = document.getElementById('input-preview');
+    if (!messages || !inputPreview) return;
+    if (step === 0) {
+      messages.innerHTML = '';
+      if (intro) { messages.appendChild(intro); intro.style.display = 'block'; }
+      inputPreview.textContent = 'Try clicking a step below...';
+      demoCurrentStep = 0;
+      unlockBtn(1); lockBtn(2); lockBtn(3); lockBtn(4);
+      return;
+    }
+    if (step !== demoCurrentStep + 1) return;
+    demoCurrentStep = step;
+    const s = demoSteps[step];
+    if (intro) intro.style.display = 'none';
+    if (s.type === 'user') {
+      inputPreview.textContent = s.input;
+      const msg = document.createElement('div');
+      msg.style.cssText = 'display:flex;justify-content:flex-end;';
+      msg.innerHTML = '<div style="background:#1B2A4A;color:white;border-radius:14px 14px 4px 14px;padding:11px 15px;max-width:75%;font-size:0.85rem;line-height:1.6;">' + s.bubble + '</div>';
+      messages.appendChild(msg);
+    } else if (s.type === 'claude') {
+      inputPreview.textContent = 'Try clicking a step below...';
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+      wrap.innerHTML = '<div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#c97b5e,#8c5a8c);display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;color:white;font-weight:700;">C</div><div style="background:#f5f7fa;border:1px solid #e8ecf2;border-radius:4px 14px 14px 14px;padding:12px 15px;max-width:80%;font-size:0.83rem;line-height:1.7;color:#2d3748;">' + s.bubble + '</div>';
+      messages.appendChild(wrap);
+    }
+    messages.scrollTop = messages.scrollHeight;
+    if (step < 4) unlockBtn(step + 1);
+    lockBtnActive(step);
+  }
+
+  function unlockBtn(n) { const b = document.getElementById('btn-step-' + n); if (!b) return; b.disabled = false; b.style.borderColor = '#1B2A4A'; b.style.color = '#1B2A4A'; b.style.cursor = 'pointer'; }
+  function lockBtn(n) { const b = document.getElementById('btn-step-' + n); if (!b) return; b.disabled = true; b.style.borderColor = '#ddd'; b.style.color = '#aaa'; b.style.cursor = 'not-allowed'; }
+  function lockBtnActive(n) { const b = document.getElementById('btn-step-' + n); if (!b) return; b.style.background = '#1B2A4A'; b.style.color = 'white'; }
+
+  // Project demo
+  const projSteps = [
+    { type:'reset' },
+    { type:'modal', input:'Click "+ New Project" in the sidebar, name it, and add your instructions.' },
+    { type:'system', bubble:'📁 <strong>Project "Safety Curriculum 2025" created!</strong><br><br>Your custom instructions are saved: <em>"I am a lineman instructor at NLC. Always write for an apprentice audience and use field-relevant examples."</em><br><br>Claude will remember this context in every conversation inside this project.' },
+    { type:'user', input:'Build me a Safety Training Dashboard that tracks the 5 core safety topics for our apprentice program. Include completion status for each topic.', bubble:'Build me a Safety Training Dashboard that tracks the 5 core safety topics for our apprentice program. Include completion status for each topic.' },
+    { type:'claude', bubble:'Great — here\'s a <strong>Safety Training Dashboard</strong> for your apprentice program:<br><br><div style="background:#f8faff;border:1px solid #dde8f8;border-radius:10px;padding:14px;margin-top:6px;font-size:0.82rem;"><strong style="color:#1B2A4A;">📊 NLC Apprentice Safety Dashboard</strong><br><br><div style="display:grid;gap:6px;margin-top:10px;"><div style="display:flex;align-items:center;justify-content:space-between;background:white;border-radius:8px;padding:8px 12px;border:1px solid #e2e8f0;"><span>⚡ Electrical Hazard Awareness</span><span style="background:#f0fff4;color:#276749;border-radius:12px;padding:2px 10px;font-size:0.78rem;font-weight:700;">✓ Complete</span></div><div style="display:flex;align-items:center;justify-content:space-between;background:white;border-radius:8px;padding:8px 12px;border:1px solid #e2e8f0;"><span>🪜 Fall Protection & Climbing</span><span style="background:#f0fff4;color:#276749;border-radius:12px;padding:2px 10px;font-size:0.78rem;font-weight:700;">✓ Complete</span></div><div style="display:flex;align-items:center;justify-content:space-between;background:white;border-radius:8px;padding:8px 12px;border:1px solid #e2e8f0;"><span>🔒 LOTO Procedures</span><span style="background:#fffbf0;color:#c47f00;border-radius:12px;padding:2px 10px;font-size:0.78rem;font-weight:700;">⏳ In Progress</span></div><div style="display:flex;align-items:center;justify-content:space-between;background:white;border-radius:8px;padding:8px 12px;border:1px solid #e2e8f0;"><span>🦺 PPE Requirements</span><span style="background:#fff5f5;color:#9b2c2c;border-radius:12px;padding:2px 10px;font-size:0.78rem;font-weight:700;">✗ Not Started</span></div><div style="display:flex;align-items:center;justify-content:space-between;background:white;border-radius:8px;padding:8px 12px;border:1px solid #e2e8f0;"><span>🚨 Emergency Response</span><span style="background:#fff5f5;color:#9b2c2c;border-radius:12px;padding:2px 10px;font-size:0.78rem;font-weight:700;">✗ Not Started</span></div></div></div><br>Want me to add due dates, instructor names, or export it as a printable checklist?' },
+    { type:'saved', bubble:'✅ <strong>Dashboard saved to your "Safety Curriculum 2025" Project.</strong><br><br>Every time you return to this Project, Claude will have full context — your role, your audience, and this dashboard — ready to pick up right where you left off.' }
+  ];
+  let projCurrentStep = 0;
+
+  function projStep(step) {
+    const chat = document.getElementById('proj-chat');
+    const intro = document.getElementById('proj-intro');
+    const preview = document.getElementById('proj-input-preview');
+    const modal = document.getElementById('proj-modal');
+    const sidebarProject = document.getElementById('proj-sidebar-project');
+    if (!chat || !preview) return;
+    if (step === 0) {
+      chat.innerHTML = '';
+      if (intro) { chat.appendChild(intro); intro.style.display = 'block'; }
+      preview.textContent = 'Select a step below to begin...';
+      if (modal) modal.style.display = 'none';
+      if (sidebarProject) sidebarProject.style.display = 'none';
+      projCurrentStep = 0;
+      projUnlock(1); projLock(2); projLock(3); projLock(4); projLock(5);
+      return;
+    }
+    if (step !== projCurrentStep + 1) return;
+    projCurrentStep = step;
+    const s = projSteps[step];
+    if (intro) intro.style.display = 'none';
+    if (s.type === 'modal') {
+      if (modal) { modal.style.display = 'flex'; }
+      preview.textContent = s.input;
+      setTimeout(() => { if (modal) modal.style.display = 'none'; projUnlock(step + 1); projLockActive(step); }, 2200);
+      return;
+    }
+    if (s.type === 'system') {
+      if (sidebarProject) sidebarProject.style.display = 'block';
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'background:#f0f5ff;border:1px solid #b3c8f0;border-radius:12px;padding:12px 15px;font-size:0.83rem;line-height:1.7;color:#1B2A4A;';
+      wrap.innerHTML = s.bubble;
+      chat.appendChild(wrap);
+      preview.textContent = 'Project ready — start chatting!';
+    } else if (s.type === 'user') {
+      preview.textContent = s.input;
+      const msg = document.createElement('div');
+      msg.style.cssText = 'display:flex;justify-content:flex-end;';
+      msg.innerHTML = '<div style="background:#1B2A4A;color:white;border-radius:14px 14px 4px 14px;padding:11px 15px;max-width:80%;font-size:0.85rem;line-height:1.6;">' + s.bubble + '</div>';
+      chat.appendChild(msg);
+    } else if (s.type === 'claude' || s.type === 'saved') {
+      preview.textContent = s.type === 'saved' ? 'Saved to Project ✓' : 'Try clicking a step below...';
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+      const iconBg = s.type === 'saved' ? 'background:#48bb78;' : 'background:linear-gradient(135deg,#c97b5e,#8c5a8c);';
+      const iconChar = s.type === 'saved' ? '✓' : 'C';
+      wrap.innerHTML = '<div style="width:30px;height:30px;border-radius:50%;' + iconBg + 'display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;color:white;font-weight:700;">' + iconChar + '</div><div style="background:#f5f7fa;border:1px solid #e8ecf2;border-radius:4px 14px 14px 14px;padding:12px 15px;max-width:85%;font-size:0.83rem;line-height:1.7;color:#2d3748;">' + s.bubble + '</div>';
+      chat.appendChild(wrap);
+    }
+    chat.scrollTop = chat.scrollHeight;
+    if (step < 5) projUnlock(step + 1);
+    projLockActive(step);
+  }
+
+  function projUnlock(n) { const b = document.getElementById('proj-btn-' + n); if (!b) return; b.disabled = false; b.style.borderColor = '#1B2A4A'; b.style.color = '#1B2A4A'; b.style.cursor = 'pointer'; }
+  function projLock(n) { const b = document.getElementById('proj-btn-' + n); if (!b) return; b.disabled = true; b.style.borderColor = '#ddd'; b.style.color = '#aaa'; b.style.cursor = 'not-allowed'; }
+  function projLockActive(n) { const b = document.getElementById('proj-btn-' + n); if (!b) return; b.style.background = '#1B2A4A'; b.style.color = 'white'; }
+
+  function answer(btn, qid, correct) {
+    if (quizAttempted[qid]) return;
+    quizAttempted[qid] = true;
+    const opts = btn.parentElement.querySelectorAll('.quiz-opt');
+    opts.forEach(o => o.disabled = true);
+    const result = document.getElementById(qid + '-result');
+    if (correct) { btn.classList.add('correct'); result.textContent = '✅ Correct! Great work.'; result.className = 'quiz-result show pass'; }
+    else { btn.classList.add('wrong'); result.textContent = '❌ Not quite — review the module and remember the key principle.'; result.className = 'quiz-result show fail'; }
+    if (Object.values(quizAttempted).every(v => v === true)) {
+      document.getElementById('completionSection').style.display = 'block';
+      const fb = document.getElementById('finishBtn');
+      fb.disabled = false;
+      fb.onclick = () => alert('🎉 Congratulations! You\'ve completed the NLC Claude training. Happy prompting!');
+      document.getElementById('completionSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function copyPrompt(el) {
+    const text = el.textContent.replace('📋 Copy','').replace('✅ Copied!','').trim();
+    navigator.clipboard.writeText(text).then(() => { el.classList.add('copied'); setTimeout(() => el.classList.remove('copied'), 2000); });
+  }
+</script>
+</body>
+</html>
